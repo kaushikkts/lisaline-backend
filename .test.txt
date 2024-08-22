@@ -1,0 +1,67 @@
+Girish Wani
+Quality Manager
+Authorised Signatory
+Customer Name & Address :
+M/s.Sun Pharmaceutical Industries Ltd
+BARODA R&D
+Nima Compound, Tandalja
+A.B.Road, Vadodara 390012 Gujarat India
+ 
+Environmental Condition
+Temperature:23.2 °C
+Humidity:62 % RH
+Location of Calibration: LAB
+Condition of Item:Good
+ULR No:CC221024000002203F
+Certificate No:24/6-203-T-2203
+Date of Issue:27-Jun-24
+Date of Receipt:25-Jun-24
+SRQ No:2024/203
+Calibration Date:26-Jun-24
+Recommended Due Date:25-Jun-25
+Parameter:Temperature
+Calibration methodW/LAB/001
+Details of item (UUC)
+Instrument:Data Logger With SensorMake:Dickson
+Sr. No. of Indicator:EA0F0000031ARange:-100 to 200 °C 
+Sr. No. of Sensor:34B9159000001041Type:PT 100 Smart Sensor
+Accuracy :NA Resolution:0.01 °C
+Instrument ID No:NALocation:NA
+Department:NAModel:Cobalt X
+Details of Reference used for calibration
+Certificate No:ACPL/TH/L/1695/01/23-24Make:Wika
+Validity Date:14-Sep-24Range:-200 to 400 °C
+Model:CTH 6500Type:PT 100
+Sr. No. of Indicator:75014010667Resolution:0.01 °C
+Sr. No. of Sensor:140003Uncertainty of standard0.06 °C
+Observation
+Set Point
+(°C) 
+Standard Measured 
+Value (°C)
+UUC Measured value 
+(°C)
+Deviation in 
+(°C)
+Expanded  Uncertainty
+ in (±) (°C)
+-80-79.80-80.13-0.330.4
+-40-39.74-39.78-0.040.4
+0-0.10-0.010.090.4
+2525.2025.330.130.4
+8080.1680.340.180.15
+Uncertainty at k=2 for confidence level approximately 95%
+Remark:
+1. Result are related only to the item calibrated. Reported values are average of five readings. 
+2.This certificate refers only to the perticular items submitted for calibration. 
+3.This certificate shall not be reproduce except in full with out our prior permission in writing.
+4.The Calibration results reported in this particular certificate are valid at the time of an under stated condition of measurement.
+5.Standard used for calibration were traceable to national standard.
+6.Readings given above are as on received condition of an instrument.
+CALIBRATION CERTIFICATE
+***  End of Certificate  ***F/LAB/020-03
+Lisaline Lifescience Technologies Calibration Laboratory
+401-D, Wi Fi Park, Plot No. B-3, Road No.3, Wagle Industrial Estate, 
+Thane, Maharashtra 400604
+CC - 2210
+----------------Page (0) Break----------------
