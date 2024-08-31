@@ -2,3 +2,5 @@ uploads/
 .DS_Store
 .idea/
 /node_modules/
+pdfs/
+pdfs.zip

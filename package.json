@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "pm2 start index.js --max-memory-restart 100 --name lisaline-backend --watch -f",
+    "scale": "pm2 scale lisaline-backend 4"
   },
   "author": "",
   "license": "ISC",
@@ -14,12 +16,17 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "fs": "^0.0.1-security",
+    "html-pdf-node": "^1.0.8",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "multer": "^1.4.5-lts.1",
     "pdf-parse": "^1.1.1",
     "pdf2json": "^3.1.4",
     "pdfreader": "^3.0.4",
     "pg": "^8.12.0",
+    "pm2": "^5.4.2",
     "postgres": "^3.4.4",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "zip-a-folder": "^3.1.7"
   }
 }
