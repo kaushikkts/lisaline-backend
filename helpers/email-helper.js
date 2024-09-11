@@ -1,7 +1,7 @@
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
 const mailgun = new Mailgun(formData);
-const mg = mailgun.client({username: 'api', key: '4adb04c04ae3bf6e0c531745ab7f61ac-826eddfb-4064d330'});
+const mg = mailgun.client({username: 'api', key: ''});
 
 
 const sendEmail = async (to, zip) => {
