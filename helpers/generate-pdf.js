@@ -5,11 +5,13 @@ const {zip, COMPRESSION_LEVEL} = require('zip-a-folder');
 
 
 
-function generatePDFs(data) {
+async function generatePDFs(data) {
     let files = [];
-    console.log(data);
+    console.log(JSON.stringify(data));
     data.forEach((certificate) => {
-        let file = {content: `
+        const certificateDate = new Date(certificate.date).getDate() + '-' + new Date(certificate.date).getMonth() + '-' + new Date(certificate.date).getFullYear();
+        let file = {
+            content: `
 
 <html>
    <head>
@@ -38,10 +40,10 @@ function generatePDFs(data) {
          </tr>
          <tr class="c77">
             <td class="c20" colspan="1" rowspan="1">
-               <p class="c66"><span class="c13">${certificate.id}</span></p>
+               <p class="c66"><span class="c13">${certificate?.serialnumber.split('-')[0]}</span></p>
             </td>
             <td class="c73" colspan="1" rowspan="1">
-               <p class="c44"><span class="c13">${certificate.date}</span></p>
+               <p class="c44"><span class="c13">${certificateDate} </span></p>
             </td>
             <td class="c32" colspan="1" rowspan="1">
                <p class="c36"><span class="c72">1</span></p>
@@ -72,13 +74,13 @@ function generatePDFs(data) {
                <p class="c22"><span class="c6">Serial Number:</span></p>
             </td>
             <td class="c45" colspan="1" rowspan="1">
-               <p class="c2"><span class="c6">DS-${certificate.modelnumber}</span></p>
+               <p class="c2"><span class="c6">${certificate?.serialnumber}</span></p>
             </td>
             <td class="c74" colspan="1" rowspan="1">
                <p class="c51"><span class="c6">Resolution:</span></p>
             </td>
             <td class="c46" colspan="1" rowspan="1">
-               <p class="c11"><span class="c6">${certificate?.content?.resolution}</span></p>
+               <p class="c11"><span class="c6">${certificate?.content?.productDetails?.resolution}</span></p>
             </td>
          </tr>
          <tr class="c82">
@@ -133,7 +135,7 @@ function generatePDFs(data) {
                   <p class="c67"><span class="c13">${certificate?.content?.referenceInstrumentation?.accuracy}</span></p>
                </td>
                <td class="c55" colspan="1" rowspan="1">
-                  <p class="c36"><span class="c72 c85">${certificate?.content?.referenceInstrumentation?.indicator}</span></p>
+                  <p class="c36"><span class="c72 c85">${certificate?.content?.referenceInstrumentation?.serialNumber}</span></p>
                </td>
             </tr>
          </thead>
@@ -154,10 +156,10 @@ function generatePDFs(data) {
          </tr>
          <tr class="c3">
             <td class="c80" colspan="1" rowspan="1">
-               <p class="c17"><span class="c16">25</span></p>
+               <p class="c17"><span class="c16">25°C</span></p>
             </td>
             <td class="c81" colspan="1" rowspan="1">
-               <p class="c17"><span class="c16">85</span></p>
+               <p class="c17"><span class="c16">85%</span></p>
             </td>
          </tr>
       </table>
@@ -167,13 +169,13 @@ function generatePDFs(data) {
       <table class="c86">
          <tr class="c68">
             <td class="c18" colspan="1" rowspan="1">
-               <p class="c25"><span class="c1">Set point Points</span></p>
+               <p class="c25"><span class="c1">Set Points</span></p>
             </td>
             <td class="c12" colspan="1" rowspan="1">
-               <p class="c78"><span class="c1">&nbsp; &nbsp; Deviation</span></p>
+               <p class="c78"><span class="c1">Deviation</span></p>
             </td>
             <td class="c33" colspan="1" rowspan="1">
-               <p class="c78"><span class="c1">&nbsp; Uncertainty</span></p>
+               <p class="c78"><span class="c1">Result</span></p>
             </td>
          </tr>
          <tr class="c52">
@@ -184,7 +186,7 @@ function generatePDFs(data) {
                <p class="c27"><span class="c9">${certificate?.content?.temperatureValidation?.deviation[0]}&deg;C</span></p>
             </td>
             <td class="c33" colspan="1" rowspan="1">
-               <p class="c27"><span class="c9">&plusmn;${certificate?.content?.temperatureValidation?.uncertainty[0]}&deg;C</span></p>
+               <p class="c27"><span class="c9">${certificate?.content?.temperatureValidation?.result[0]}</span></p>
             </td>
          </tr>
          <tr class="c52">
@@ -195,7 +197,7 @@ function generatePDFs(data) {
                <p class="c27"><span class="c9">${certificate?.content?.temperatureValidation?.deviation[1]}&deg;C</span></p>
             </td>
             <td class="c33" colspan="1" rowspan="1">
-               <p class="c27"><span class="c9">&plusmn;${certificate?.content?.temperatureValidation?.uncertainty[1]}&deg;C</span></p>
+               <p class="c27"><span class="c9">${certificate?.content?.temperatureValidation?.result[1]}</span></p>
             </td>
          </tr>
          <tr class="c52">
@@ -206,7 +208,7 @@ function generatePDFs(data) {
                <p class="c27"><span class="c9">${certificate?.content?.temperatureValidation?.deviation[2]}&deg;C</span></p>
             </td>
             <td class="c33" colspan="1" rowspan="1">
-               <p class="c27"><span class="c9">&plusmn;${certificate?.content?.temperatureValidation?.uncertainty[2]}&deg;C</span></p>
+               <p class="c27"><span class="c9">${certificate?.content?.temperatureValidation?.result[2]}</span></p>
             </td>
          </tr>
          <tr class="c52">
@@ -217,7 +219,7 @@ function generatePDFs(data) {
                <p class="c27"><span class="c9">${certificate?.content?.temperatureValidation?.deviation[3]}&deg;C</span></p>
             </td>
             <td class="c33" colspan="1" rowspan="1">
-               <p class="c27"><span class="c9">&plusmn;${certificate?.content?.temperatureValidation?.uncertainty[3]}&deg;C</span></p>
+               <p class="c27"><span class="c9">${certificate?.content?.temperatureValidation?.result[3]}</span></p>
             </td>
          </tr>
          <tr class="c63">
@@ -228,7 +230,7 @@ function generatePDFs(data) {
                <p class="c21"><span class="c9">${certificate?.content?.temperatureValidation?.deviation[4]}&deg;C</span></p>
             </td>
             <td class="c33" colspan="1" rowspan="1">
-               <p class="c21"><span class="c9">&plusmn;${certificate?.content?.temperatureValidation?.uncertainty[4]}&deg;C</span></p>
+               <p class="c21"><span class="c9">${certificate?.content?.temperatureValidation?.result[4]}</span></p>
             </td>
          </tr>
       </table>
@@ -242,24 +244,34 @@ function generatePDFs(data) {
    </body>
 </html>
 
-`};
-        files.push(file)
-    })
-
-    html_to_pdf.generatePdfs(files, {format: 'A4'}).then(async pdfBuffer => {
-        console.log(`Generating PDF`, pdfBuffer);
-        pdfBuffer.forEach((pdf, index) => {
-            fs.writeFile(`pdfs/some-test${index}.pdf`, pdf.buffer, (err, data) => {
+`
+        };
+        html_to_pdf.generatePdf(file, {format: 'A4'}).then(pdfBuffer => {
+            console.log(`Generating PDF`, pdfBuffer);
+            fs.writeFile(`pdfs/${certificate.serialnumber}.pdf`, pdfBuffer, (err, data) => {
                 if (err) {
-                    console.log(`Error on file ${index} : - ${err}`);
+                    console.log(`Error on file : - ${err}`);
                 } else {
-                    console.log(`The file ${index} has been saved!`);
+                    console.log(`The file has been saved!`);
                 }
             });
-        });
-        await zip('pdfs', 'pdfs.zip', {compression: COMPRESSION_LEVEL.high});
-    });
+        })
+    })
+    await zip('pdfs', 'pdfs.zip', {compression: COMPRESSION_LEVEL.high});
 }
+    // html_to_pdf.generatePdfs(files, {format: 'A4'}).then(async pdfBuffer => {
+    //     console.log(`Generating PDF`, pdfBuffer);
+    //     pdfBuffer.forEach((pdf, index) => {
+    //         fs.writeFile(`pdfs/some-test${index}.pdf`, pdf.buffer, (err, data) => {
+    //             if (err) {
+    //                 console.log(`Error on file ${index} : - ${err}`);
+    //             } else {
+    //                 console.log(`The file ${index} has been saved!`);
+    //             }
+    //         });
+    //     });
+    //     await zip('pdfs', 'pdfs.zip', {compression: COMPRESSION_LEVEL.high});
+    // });
 
 module.exports = {
     generatePDFs

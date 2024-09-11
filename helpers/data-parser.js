@@ -20,68 +20,75 @@ const db = postgres({
 
 const upload = multer({storage: storage});
 let parsePDF = (filePath, batchId) => {
-    const pdfParser = new PDFParser(this, 1);
-    let certificateData = {};
-    pdfParser.loadPDF(filePath);
-    pdfParser.on("pdfParser_dataError", (errData) =>
-        console.error(errData.parserError)
-    );
-    pdfParser.on("pdfParser_dataReady", async (pdfData, index) => {
-        pdfData.Pages[0].Texts.forEach((element, index) => {
-            element["index"] = index;
-        });
-        certificateData = {
-            productDetails: {
-                name: pdfData.Pages[0].Texts[156].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[157].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[158].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[159].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[160].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[161].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[162].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                type: pdfData.Pages[0].Texts[200].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                resolution: pdfData.Pages[0].Texts[210].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[211].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[212].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                range: pdfData.Pages[0].Texts[47].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-            },
-            referenceInstrumentation: {
-                model: pdfData.Pages[0].Texts[252].R[0].T,
-                brand: pdfData.Pages[0].Texts[278].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                calibrationDate: pdfData.Pages[0].Texts[66].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[67].R[0].T + pdfData.Pages[0].Texts[68].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[69].R[0].T + pdfData.Pages[0].Texts[70].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                serialNumber: pdfData.Pages[0].Texts[292].R[0].T,
-                accuracy: pdfData.Pages[0].Texts[312].R[0].T + pdfData.Pages[0].Texts[313].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                    + pdfData.Pages[0].Texts[314].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-            },
-            temperatureValidation: {
-                setPoints: [
-                    pdfData.Pages[0].Texts[351].R[0].T + pdfData.Pages[0].Texts[352].R[0].T,
-                    pdfData.Pages[0].Texts[361].R[0].T + pdfData.Pages[0].Texts[362].R[0].T,
-                    pdfData.Pages[0].Texts[370].R[0].T,
-                    pdfData.Pages[0].Texts[378].R[0].T,
-                    pdfData.Pages[0].Texts[386].R[0].T,
-                ],
-                // tolerance: [
-                //     pdfData.Pages[0].Texts[101].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //     pdfData.Pages[0].Texts[106].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //     pdfData.Pages[0].Texts[111].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //     pdfData.Pages[0].Texts[116].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //     pdfData.Pages[0].Texts[121].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                // ],
-                result: [
-                    pdfData.Pages[0].Texts[358].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                    pdfData.Pages[0].Texts[368].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                    pdfData.Pages[0].Texts[376].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                    pdfData.Pages[0].Texts[384].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                    pdfData.Pages[0].Texts[392].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                ],
+    return new Promise((resolve, reject) => {
+        const pdfParser = new PDFParser(this, 1);
+        let certificateData = {};
+        pdfParser.loadPDF(filePath);
+        pdfParser.on("pdfParser_dataError", (errData) =>
+            console.error(errData.parserError)
+        );
+        pdfParser.on("pdfParser_dataReady", async (pdfData, index) => {
+            pdfData.Pages[0].Texts.forEach((element, index) => {
+                element["index"] = index;
+            });
+            certificateData = {
+                productDetails: {
+                    name: pdfData.Pages[0].Texts[156].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[157].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[158].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[159].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[160].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[161].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[162].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                    type: pdfData.Pages[0].Texts[200].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                    resolution: pdfData.Pages[0].Texts[210].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                    range: pdfData.Pages[0].Texts[177].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[178].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[179].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[180].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[181].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[182].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[183].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+
+                },
+                referenceInstrumentation: {
+                    model: pdfData.Pages[0].Texts[252].R[0].T,
+                    brand: pdfData.Pages[0].Texts[278].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                    calibrationDate: pdfData.Pages[0].Texts[66].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[67].R[0].T + pdfData.Pages[0].Texts[68].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[69].R[0].T + pdfData.Pages[0].Texts[70].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                    serialNumber: pdfData.Pages[0].Texts[292].R[0].T,
+                    accuracy: pdfData.Pages[0].Texts[312].R[0].T + pdfData.Pages[0].Texts[313].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[314].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                },
+                temperatureValidation: {
+                    setPoints: [
+                        pdfData.Pages[0].Texts[351].R[0].T + pdfData.Pages[0].Texts[352].R[0].T,
+                        pdfData.Pages[0].Texts[361].R[0].T + pdfData.Pages[0].Texts[362].R[0].T,
+                        pdfData.Pages[0].Texts[370].R[0].T,
+                        pdfData.Pages[0].Texts[378].R[0].T,
+                        pdfData.Pages[0].Texts[386].R[0].T,
+                    ],
+                    deviation: [
+                        pdfData.Pages[0].Texts[101].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        pdfData.Pages[0].Texts[106].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        pdfData.Pages[0].Texts[111].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        pdfData.Pages[0].Texts[116].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        pdfData.Pages[0].Texts[121].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                    ],
+                    result: [
+                        pdfData.Pages[0].Texts[358].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        pdfData.Pages[0].Texts[368].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        pdfData.Pages[0].Texts[376].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        pdfData.Pages[0].Texts[384].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        pdfData.Pages[0].Texts[392].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                    ],
+                }
             }
-        }
-        console.log(certificateData)
-        // await db`update public."certificate" set content=${certificateData} where batchId = ${batchId}`;
-    })
+            await db`update public."certificate" set content=${certificateData} where batchId = ${batchId}`;
+            resolve(certificateData);
+        });
+    });
 }
 
 let parseExcel = async (filePath, batchId) => {

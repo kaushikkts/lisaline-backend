@@ -23,9 +23,9 @@ const db = postgres({
 
 
 app.post('/api/batch', async (req, res) => {
-    const {refInput, quantity, inspectorId, batchId} = req.body;
+    const {calibrationDate, quantity, inspectorName, batchId} = req.body;
     try {
-        const insertResponse = await db`insert into public."batch" (id, batchId, refInput, quantity, createdBy) values (${uuidv4()}, ${batchId}, ${refInput}, ${quantity}, ${inspectorId}) returning id`;
+        const insertResponse = await db`insert into public."batch" (id, batchId, quantity, inspectorname, calibrationDate) values (${uuidv4()}, ${batchId}, ${quantity}, ${inspectorName}, ${calibrationDate}) returning id`;
         res.json(insertResponse);
     } catch (e) {
         res.status(400).json({message: `Error while creating batch : - ${e}`});
@@ -34,44 +34,54 @@ app.post('/api/batch', async (req, res) => {
 })
 
 app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
-    // if (req.files.length !== 2) {
-    //     res.status(400).json({message: 'Please upload Master Certificate PDF and Serial Number CSV files'});
-    // }
+    if (req.files.length !== 2) {
+        res.status(400).json({message: 'Please upload Master Certificate PDF and Serial Number CSV files'});
+    }
 
     const masterCertificate = req.files.find(file => file.mimetype === 'application/pdf');
-    // const serialNumberFile = req.files.find(file => file.mimetype === 'application/vnd.ms-excel');
-    //
-    // console.log(masterCertificate.path, serialNumberFile.path);
-    // const updateResponse = await db`update public."batch" set master_cert=${masterCertificate.path}, jung_csv=${serialNumberFile.path} where id=${req.params?.id}`;
-    // console.log(updateResponse);
+    const serialNumberFile = req.files.find(file => file.mimetype === 'application/vnd.ms-excel');
 
-    // if (!masterCertificate) {
-    //     res.status(400).json({message: 'Please upload Master Certificate PDF file'});
-    // }
-    // if (!serialNumberFile) {
-    //     res.status(400).json({message: 'Please upload Serial Number CSV file'});
-    // }
-    //
-    // await parseExcel(serialNumberFile.path, req.params?.id);
-    parsePDF(masterCertificate.path, req.params?.id);
+    console.log(masterCertificate.path, serialNumberFile.path);
+    const updateResponse = await db`update public."batch" set master_cert=${masterCertificate.path}, jung_csv=${serialNumberFile.path} where id=${req.params?.id}`;
+    console.log(updateResponse);
+
+    if (!masterCertificate) {
+        res.status(400).json({message: 'Please upload Master Certificate PDF file'});
+    }
+    if (!serialNumberFile) {
+        res.status(400).json({message: 'Please upload Serial Number CSV file'});
+    }
+
+    await parseExcel(serialNumberFile.path, req.params?.id);
+    const certificateData = await parsePDF(masterCertificate.path, req.params?.id);
+    console.log(certificateData);
     res.json({
-        body: req.body,
-        // csv: serialNumberFile,
-        pdf: masterCertificate,
+        batchId: req.params?.id,
+        certificateDate: certificateData,
+        message: "Files uploaded successfully, and data parsed"
     });
+});
+
+app.get('/api/review/:id', async (req, res) => {
+    const batchId = req.params?.id;
+    const result = await db`select * from public."certificate" where batchid=${batchId}`;
+    res.json(result);
 });
 
 
 app.post('/api/generatePDF', async (req, res) => {
+    const {serialNumbers} = req.body;
+    const queryArray = serialNumbers.map(s => `${s}%`);
+
     const result = await db`select certificate.id,
                                                     certificate.date::date,
-                                                    "user".firstname,
-                                                    "user".lastname,
                                                     certificate.content,
                                                     certificate.serialnumber,
-                                                    certificate.modelnumber
-                                                      from public."certificate" inner join public."user" on certificate.inspector = "user".id` ;
-
+                                                    certificate.modelnumber,
+                                                    batch.calibrationdate::date
+                                                    
+                                                      from public."certificate" inner join public."batch" on certificate.batchid = batch.id
+                                                      where certificate.serialnumber like any(${queryArray})` ;
     generatePDFs(result);
 
     res.json(result);
