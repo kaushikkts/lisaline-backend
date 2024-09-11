@@ -1,6 +1,7 @@
 const html_to_pdf = require("html-pdf-node");
 const fs = require("fs");
 const {zip, COMPRESSION_LEVEL} = require('zip-a-folder');
+const sendEmail = require("./email-helper");
 
 
 
@@ -258,21 +259,9 @@ async function generatePDFs(data) {
         })
     })
     await zip('pdfs', 'pdfs.zip', {compression: COMPRESSION_LEVEL.high});
+    let file = fs.readFileSync('pdfs.zip');
+    await sendEmail('kkarandikar08@gmail.com', file);
 }
-    // html_to_pdf.generatePdfs(files, {format: 'A4'}).then(async pdfBuffer => {
-    //     console.log(`Generating PDF`, pdfBuffer);
-    //     pdfBuffer.forEach((pdf, index) => {
-    //         fs.writeFile(`pdfs/some-test${index}.pdf`, pdf.buffer, (err, data) => {
-    //             if (err) {
-    //                 console.log(`Error on file ${index} : - ${err}`);
-    //             } else {
-    //                 console.log(`The file ${index} has been saved!`);
-    //             }
-    //         });
-    //     });
-    //     await zip('pdfs', 'pdfs.zip', {compression: COMPRESSION_LEVEL.high});
-    // });
-
 module.exports = {
     generatePDFs
 }
