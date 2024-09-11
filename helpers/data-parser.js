@@ -61,29 +61,65 @@ let parsePDF = (filePath, batchId) => {
                     accuracy: pdfData.Pages[0].Texts[312].R[0].T + pdfData.Pages[0].Texts[313].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
                         + pdfData.Pages[0].Texts[314].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
                 },
-                temperatureValidation: {
-                    setPoints: [
-                        pdfData.Pages[0].Texts[351].R[0].T + pdfData.Pages[0].Texts[352].R[0].T,
-                        pdfData.Pages[0].Texts[361].R[0].T + pdfData.Pages[0].Texts[362].R[0].T,
-                        pdfData.Pages[0].Texts[370].R[0].T,
-                        pdfData.Pages[0].Texts[378].R[0].T,
-                        pdfData.Pages[0].Texts[386].R[0].T,
-                    ],
-                    deviation: [
-                        pdfData.Pages[0].Texts[101].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                        pdfData.Pages[0].Texts[106].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                        pdfData.Pages[0].Texts[111].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                        pdfData.Pages[0].Texts[116].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                        pdfData.Pages[0].Texts[121].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                    ],
-                    result: [
-                        pdfData.Pages[0].Texts[358].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                        pdfData.Pages[0].Texts[368].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                        pdfData.Pages[0].Texts[376].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                        pdfData.Pages[0].Texts[384].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                        pdfData.Pages[0].Texts[392].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                    ],
+                temperatureValidation: [
+                    {
+                        setPoints: pdfData.Pages[0].Texts[351].R[0].T + pdfData.Pages[0].Texts[352].R[0].T,
+                        deviation: pdfData.Pages[0].Texts[101].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        result: pdfData.Pages[0].Texts[358].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                    },
+                    {
+                        setPoints: pdfData.Pages[0].Texts[361].R[0].T + pdfData.Pages[0].Texts[362].R[0].T,
+                        deviation: pdfData.Pages[0].Texts[106].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        result: pdfData.Pages[0].Texts[368].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                    },
+                    {
+                        setPoints: pdfData.Pages[0].Texts[370].R[0].T,
+                        deviation: pdfData.Pages[0].Texts[111].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        result: pdfData.Pages[0].Texts[376].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                    },
+                    {
+                        setPoints: pdfData.Pages[0].Texts[378].R[0].T,
+                        deviation: pdfData.Pages[0].Texts[116].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        result: pdfData.Pages[0].Texts[384].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                    },
+                    {
+                        setPoints: pdfData.Pages[0].Texts[386].R[0].T,
+                        deviation: pdfData.Pages[0].Texts[121].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                        result: pdfData.Pages[0].Texts[392].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                    }
+                ],
+                temperatureAndHumidity: {
+                    temperature: pdfData.Pages[0].Texts[94].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                    + pdfData.Pages[0].Texts[95].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%') + pdfData.Pages[0].Texts[96].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                    humidity: pdfData.Pages[0].Texts[112].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[113].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[114].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[115].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[116].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
                 }
+                // temperatureValidation: {
+                //     setPoints: [
+                //         pdfData.Pages[0].Texts[351].R[0].T + pdfData.Pages[0].Texts[352].R[0].T,
+                //         pdfData.Pages[0].Texts[361].R[0].T + pdfData.Pages[0].Texts[362].R[0].T,
+                //         pdfData.Pages[0].Texts[370].R[0].T,
+                //         pdfData.Pages[0].Texts[378].R[0].T,
+                //         pdfData.Pages[0].Texts[386].R[0].T,
+                //     ],
+                //     deviation: [
+                //         pdfData.Pages[0].Texts[101].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //         pdfData.Pages[0].Texts[106].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //         pdfData.Pages[0].Texts[111].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //         pdfData.Pages[0].Texts[116].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //         pdfData.Pages[0].Texts[121].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //     ],
+                //     result: [
+                //         pdfData.Pages[0].Texts[358].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //         pdfData.Pages[0].Texts[368].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //         pdfData.Pages[0].Texts[376].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //         pdfData.Pages[0].Texts[384].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //         pdfData.Pages[0].Texts[392].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
+                //     ],
+                // }
             }
             await db`update public."certificate" set content=${certificateData} where batchId = ${batchId}`;
             resolve(certificateData);
@@ -104,9 +140,7 @@ let parseExcel = async (filePath, batchId) => {
             rows: 1
         }
     });
-    // console.log(parseResult["Sheet1"]);
     const selectResponse = await db`select * from public."batch" where id = ${batchId}`;
-    // console.log(selectResponse);
     await db`update public."batch" set discrepancy=${selectResponse[0]?.quantity - parseResult["Sheet1"]?.length} where id = ${batchId}`;
     for (let i = 0; i < parseResult["Sheet1"].length; i++) {
         const result = parseResult["Sheet1"][i];
