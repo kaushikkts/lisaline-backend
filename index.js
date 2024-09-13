@@ -57,7 +57,7 @@ app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
     console.log(certificateData);
     res.json({
         batchId: req.params?.id,
-        certificateDate: certificateData,
+        certificateData: certificateData,
         message: "Files uploaded successfully, and data parsed"
     });
 });
@@ -70,19 +70,20 @@ app.get('/api/review/:id', async (req, res) => {
 
 
 app.post('/api/generatePDF', async (req, res) => {
-    const {serialNumbers} = req.body;
-    const queryArray = serialNumbers.map(s => `${s}%`);
+    const {serialNumbers, emailToSend} = req.body;
+    const queryArray = serialNumbers.replace(/ /g,'').split(',').map((serialNumber) => `%${serialNumber}%`);
 
     const result = await db`select certificate.id,
                                                     certificate.date::date,
                                                     certificate.content,
                                                     certificate.serialnumber,
                                                     certificate.modelnumber,
-                                                    batch.calibrationdate::date
-                                                    
+                                                    batch.calibrationdate::date,
+                                                    batch.inspectorname
+
                                                       from public."certificate" inner join public."batch" on certificate.batchid = batch.id
                                                       where certificate.serialnumber like any(${queryArray})` ;
-    generatePDFs(result);
+    generatePDFs(result, emailToSend);
 
     res.json(result);
 })

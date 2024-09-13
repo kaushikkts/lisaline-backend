@@ -31,6 +31,7 @@ let parsePDF = (filePath, batchId) => {
             pdfData.Pages[0].Texts.forEach((element, index) => {
                 element["index"] = index;
             });
+            console.log(JSON.stringify(pdfData.Pages[0].Texts));
             certificateData = {
                 productDetails: {
                     name: pdfData.Pages[0].Texts[156].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
