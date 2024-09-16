@@ -1,13 +1,11 @@
-require('events').EventEmitter.defaultMaxListeners = 20;
+require('events').EventEmitter.defaultMaxListeners = 50;
+const serverless = require('serverless-http');
 const postgres = require('postgres');
 const app = require('express')();
 const { v4: uuidv4 } = require('uuid');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const {parseExcel, parsePDF, upload} = require('./helpers/data-parser');
-const jsPDF = require('jspdf');
-const html2canvas = require('html2canvas');
-const html_to_pdf = require("html-pdf-node");
 // app.use(fileParser);
 const fs = require('fs');
 const {generatePDFs} = require("./helpers/generate-pdf");
@@ -21,7 +19,6 @@ const db = postgres({
     user: 'kaushikkarandikar',
 })
 
-
 app.post('/api/batch', async (req, res) => {
     const {calibrationDate, quantity, inspectorName, batchId} = req.body;
     try {
@@ -30,7 +27,6 @@ app.post('/api/batch', async (req, res) => {
     } catch (e) {
         res.status(400).json({message: `Error while creating batch : - ${e}`});
     }
-
 })
 
 app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
@@ -88,6 +84,12 @@ app.post('/api/generatePDF', async (req, res) => {
     res.json(result);
 })
 
+app.get('/health', (req, res) => {
+    console.log('Health check success');
+    res.status(200).json({message: 'Health check success'});
+});
+
+const handler = serverless(app);
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
