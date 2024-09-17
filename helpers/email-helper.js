@@ -8,8 +8,8 @@ const sendEmail = async (to, zip) => {
             minVersion: "TLSv1.2"
         },
         auth: {
-            user: "",
-            pass: ""
+            user: "7beb71001@smtp-brevo.com",
+            pass: "dRsBpKnyghtJHWX9"
         }
     }
     nodemailer.createTransport(configOptions).sendMail({
