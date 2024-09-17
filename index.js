@@ -118,6 +118,45 @@ app.post('/api/login', async (req, res) => {
     });
 });
 
+app.get('/api/batch/:id', async (req, res) => {
+    const inspectorId = req.params?.id;
+    try {
+        const result = await db`
+            select 
+                b.id,
+                b.calibrationdate,
+                b.batchid,
+                b.arete_batch_number,
+                b.quantity,
+                b.discrepancy,
+                b.master_cert,
+                b.jung_csv,
+                u.first_name || ' ' || u.last_name as inspectorName
+                  from public."batch" as b inner join public."user" as u on b.inspector = u.id where b.inspector=${inspectorId}`;
+        let batchData = [];
+        for (let i = 0; i < result.length; i++) {
+            const date = new Date(result[i].calibrationdate);
+            const formattedDate = date.toLocaleDateString('en-GB', {
+                day: 'numeric', month: 'short', year: 'numeric'
+            }).replace(/ /g, '-')
+            batchData.push({
+                id: result[i].id,
+                batchNumber: result[i].batchid,
+                calibrationDate: formattedDate,
+                areteBatchNumber: result[i].arete_batch_number,
+                quantity: result[i].quantity,
+                discrepancy: result[i].discrepancy,
+                masterCert: result[i].master_cert,
+                jungCSV: result[i].jung_csv,
+                inspector: result[i].inspectorname
+            })
+        }
+        res.json(batchData);
+    } catch (e) {
+        res.status(400).json({message: `Error while fetching batches : - ${e}`});
+    }
+});
+
 app.post('/api/change-password', async (req, res) => {
     const {email, oldPassword, newPassword} = req.body;
     const user = await db`select * from public."user" where email=${email}`;
