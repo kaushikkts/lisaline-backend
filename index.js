@@ -1,4 +1,5 @@
 require('events').EventEmitter.defaultMaxListeners = 50;
+const dotenv = require('dotenv');
 const postgres = require('postgres');
 const app = require('express')();
 const { v4: uuidv4 } = require('uuid');
@@ -10,6 +11,7 @@ const {generatePDFs} = require("./helpers/generate-pdf");
 const bcrypt = require('bcrypt');
 app.use(cors());
 app.use(bodyParser.json());
+dotenv.config();
 
 const db = postgres({
     host: 'localhost',
@@ -19,9 +21,10 @@ const db = postgres({
 })
 
 app.post('/api/batch', async (req, res) => {
-    const {calibrationDate, quantity, inspectorName, batchNumber} = req.body;
+    const {calibrationDate, quantity, inspector, batchNumber} = req.body;
+    console.log(calibrationDate, quantity, inspector, batchNumber);
     try {
-        const insertResponse = await db`insert into public."batch" (id, batch_number, quantity, inspector, calibrationDate) values (${uuidv4()}, ${batchNumber}, ${quantity}, ${inspectorName}, ${calibrationDate}) returning id`;
+        const insertResponse = await db`insert into public."batch" (id, batch_number, quantity, inspector, calibrationDate) values (${uuidv4()}, ${batchNumber}, ${quantity}, ${inspector}, ${calibrationDate}) returning id`;
         res.json(insertResponse);
     } catch (e) {
         res.status(400).json({message: `Error while creating batch : - ${e}`});
@@ -144,7 +147,7 @@ app.get('/api/batch/:id', async (req, res) => {
             batchData.push({
                 id: result[i].id,
                 batchNumber: result[i].batch_number,
-                calibrationDate: formattedDate,
+                calibrationDate: formattedDate === 'Invalid-Date' ? null : formattedDate,
                 areteBatchNumber: result[i].arete_batch_number,
                 quantity: result[i].quantity,
                 discrepancy: result[i].discrepancy,
@@ -168,6 +171,7 @@ app.post('/api/change-password', async (req, res) => {
     }
     const isPasswordValid = await bcrypt.compare(currentPassword, user[0].password);
     if (!isPasswordValid) {
+        res.status(401).json({message: 'Invalid password'});
         res.status(401).json({message: 'Invalid password'});
         return;
     }
