@@ -33,6 +33,8 @@ let parsePDF = (filePath, batchId) => {
             });
             console.log(JSON.stringify(pdfData.Pages[0].Texts));
             certificateData = {
+                areteBatchNumber: pdfData.Pages[0].Texts[171].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
+                        + pdfData.Pages[0].Texts[172].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
                 productDetails: {
                     name: pdfData.Pages[0].Texts[156].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
                         + pdfData.Pages[0].Texts[157].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
@@ -98,31 +100,8 @@ let parsePDF = (filePath, batchId) => {
                         + pdfData.Pages[0].Texts[115].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
                         + pdfData.Pages[0].Texts[116].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
                 }
-                // temperatureValidation: {
-                //     setPoints: [
-                //         pdfData.Pages[0].Texts[351].R[0].T + pdfData.Pages[0].Texts[352].R[0].T,
-                //         pdfData.Pages[0].Texts[361].R[0].T + pdfData.Pages[0].Texts[362].R[0].T,
-                //         pdfData.Pages[0].Texts[370].R[0].T,
-                //         pdfData.Pages[0].Texts[378].R[0].T,
-                //         pdfData.Pages[0].Texts[386].R[0].T,
-                //     ],
-                //     deviation: [
-                //         pdfData.Pages[0].Texts[101].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //         pdfData.Pages[0].Texts[106].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //         pdfData.Pages[0].Texts[111].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //         pdfData.Pages[0].Texts[116].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //         pdfData.Pages[0].Texts[121].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //     ],
-                //     result: [
-                //         pdfData.Pages[0].Texts[358].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //         pdfData.Pages[0].Texts[368].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //         pdfData.Pages[0].Texts[376].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //         pdfData.Pages[0].Texts[384].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //         pdfData.Pages[0].Texts[392].R[0].T.replace(/%2F/g, '/').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                //     ],
-                // }
             }
-            await db`update public."certificate" set content=${certificateData} where batchId = ${batchId}`;
+            await db`update public."batch" set content=${certificateData}, arete_batch_number=${certificateData.areteBatchNumber} where batchId = ${batchId}`;
             resolve(certificateData);
         });
     });

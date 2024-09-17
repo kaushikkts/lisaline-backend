@@ -19,9 +19,9 @@ const db = postgres({
 })
 
 app.post('/api/batch', async (req, res) => {
-    const {calibrationDate, quantity, inspectorName, batchId} = req.body;
+    const {calibrationDate, quantity, inspectorName, batchNumber} = req.body;
     try {
-        const insertResponse = await db`insert into public."batch" (id, batchId, quantity, inspectorname, calibrationDate) values (${uuidv4()}, ${batchId}, ${quantity}, ${inspectorName}, ${calibrationDate}) returning id`;
+        const insertResponse = await db`insert into public."batch" (id, batch_number, quantity, inspector, calibrationDate) values (${uuidv4()}, ${batchNumber}, ${quantity}, ${inspectorName}, ${calibrationDate}) returning id`;
         res.json(insertResponse);
     } catch (e) {
         res.status(400).json({message: `Error while creating batch : - ${e}`});
@@ -101,6 +101,7 @@ app.post('/api/register', async (req, res) => {
 
 app.post('/api/login', async (req, res) => {
     const {email, password} = req.body;
+
     const user = await db`select * from public."user" where email=${email}`;
     if (user.length === 0) {
         res.status(400).json({message: 'User not found'});
@@ -108,7 +109,8 @@ app.post('/api/login', async (req, res) => {
     }
     const isPasswordValid = await bcrypt.compare(password, user[0].password);
     if (!isPasswordValid) {
-        res.status(401).json({message: 'Invalid password'});
+        res.status(401).json({message: 'Wrong password entered.'});
+        return
     }
     res.status(200).json({
         id: user[0].id,
@@ -125,7 +127,7 @@ app.get('/api/batch/:id', async (req, res) => {
             select 
                 b.id,
                 b.calibrationdate,
-                b.batchid,
+                b.batch_number,
                 b.arete_batch_number,
                 b.quantity,
                 b.discrepancy,
@@ -141,12 +143,12 @@ app.get('/api/batch/:id', async (req, res) => {
             }).replace(/ /g, '-')
             batchData.push({
                 id: result[i].id,
-                batchNumber: result[i].batchid,
+                batchNumber: result[i].batch_number,
                 calibrationDate: formattedDate,
                 areteBatchNumber: result[i].arete_batch_number,
                 quantity: result[i].quantity,
                 discrepancy: result[i].discrepancy,
-                masterCert: result[i].master_cert,
+                masterCertificate: result[i].master_cert,
                 jungCSV: result[i].jung_csv,
                 inspector: result[i].inspectorname
             })
@@ -158,13 +160,13 @@ app.get('/api/batch/:id', async (req, res) => {
 });
 
 app.post('/api/change-password', async (req, res) => {
-    const {email, oldPassword, newPassword} = req.body;
+    const {email, currentPassword, newPassword} = req.body;
     const user = await db`select * from public."user" where email=${email}`;
     if (user.length === 0) {
         res.status(400).json({message: 'User not found'});
         return;
     }
-    const isPasswordValid = await bcrypt.compare(oldPassword, user[0].password);
+    const isPasswordValid = await bcrypt.compare(currentPassword, user[0].password);
     if (!isPasswordValid) {
         res.status(401).json({message: 'Invalid password'});
         return;
