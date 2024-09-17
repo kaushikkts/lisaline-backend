@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +20,7 @@
     "nodemailer": "^6.9.15",
     "pdf2json": "^3.1.4",
     "postgres": "^3.4.4",
-    "serverless-http": "^3.2.0",
+    "tslib": "^2.7.0",
     "uuid": "^10.0.0",
     "zip-a-folder": "^3.1.7"
   }

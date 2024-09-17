@@ -1,12 +1,10 @@
 require('events').EventEmitter.defaultMaxListeners = 50;
-const serverless = require('serverless-http');
 const postgres = require('postgres');
 const app = require('express')();
 const { v4: uuidv4 } = require('uuid');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const {parseExcel, parsePDF, upload} = require('./helpers/data-parser');
-// app.use(fileParser);
 const fs = require('fs');
 const {generatePDFs} = require("./helpers/generate-pdf");
 app.use(cors());
@@ -89,7 +87,6 @@ app.get('/health', (req, res) => {
     res.status(200).json({message: 'Health check success'});
 });
 
-const handler = serverless(app);
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
