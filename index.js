@@ -32,27 +32,21 @@ app.post('/api/batch', async (req, res) => {
 })
 
 app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
-    if (req.files.length !== 2) {
-        res.status(400).json({message: 'Please upload Master Certificate PDF and Serial Number CSV files'});
-    }
 
     const masterCertificate = req.files.find(file => file.mimetype === 'application/pdf');
-    const serialNumberFile = req.files.find(file => file.mimetype === 'application/vnd.ms-excel');
-
-    console.log(masterCertificate.path, serialNumberFile.path);
-    const updateResponse = await db`update public."batch" set master_cert=${masterCertificate.path}, jung_csv=${serialNumberFile.path} where id=${req.params?.id}`;
+    const jungCSVFile = req.files.find(file => file.mimetype === 'application/vnd.ms-excel');
+    console.log(jungCSVFile);
+    let certificateData = {};
+    const updateResponse = await db`update public."batch" set master_cert=${masterCertificate?.path || null}, jung_csv=${jungCSVFile?.path || null} where id=${req.params?.id}`;
     console.log(updateResponse);
 
-    if (!masterCertificate) {
-        res.status(400).json({message: 'Please upload Master Certificate PDF file'});
-    }
-    if (!serialNumberFile) {
-        res.status(400).json({message: 'Please upload Serial Number CSV file'});
+    if (masterCertificate) {
+        certificateData = await parsePDF(masterCertificate?.path, req.params?.id);
     }
 
-    await parseExcel(serialNumberFile.path, req.params?.id);
-    const certificateData = await parsePDF(masterCertificate.path, req.params?.id);
-    console.log(certificateData);
+    if (jungCSVFile) {
+        await parseExcel(jungCSVFile.path, req.params?.id);
+    }
     res.json({
         batchId: req.params?.id,
         certificateData: certificateData,

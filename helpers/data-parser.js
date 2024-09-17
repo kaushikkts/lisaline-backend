@@ -101,19 +101,19 @@ let parsePDF = (filePath, batchId) => {
                         + pdfData.Pages[0].Texts[116].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
                 }
             }
-            await db`update public."batch" set content=${certificateData}, arete_batch_number=${certificateData.areteBatchNumber} where batchId = ${batchId}`;
+            await db`update public."batch" set content=${certificateData}, arete_batch_number=${certificateData.areteBatchNumber} where id = ${batchId}`;
             resolve(certificateData);
         });
     });
 }
 
-let parseExcel = async (filePath, batchId) => {
+let parseExcel = async (filePath, batchId, inspector) => {
     const parseResult = excelToJson({
         sourceFile: filePath,
         columnToKey: {
             A: 'number',
             B: 'modelNumber',
-            C: 'serialNumber',
+            C: 'partNumber',
             D: 'result'
         },
         header: {
@@ -125,7 +125,7 @@ let parseExcel = async (filePath, batchId) => {
     for (let i = 0; i < parseResult["Sheet1"].length; i++) {
         const result = parseResult["Sheet1"][i];
         // console.log(result);
-        await db`insert into public."certificate" (batchId, inspector, modelNumber, serialNumber) values (${batchId}, 'b50fb908-fed1-486d-86cd-050ad65905b5', ${result?.modelNumber}, ${result?.serialNumber})`;
+        await db`insert into public."certificate" (batchId, inspector, modelnumber, partnumber) values (${batchId}, , ${result?.modelNumber}, ${result?.serialNumber})`;
     }
 }
 
