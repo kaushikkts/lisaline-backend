@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "pm2 start index.js -i 2"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.1691.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "convert-excel-to-json": "^1.7.0",
@@ -21,7 +22,10 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.15",
     "pdf2json": "^3.1.4",
+    "pm2": "^5.4.2",
     "postgres": "^3.4.4",
+    "puppeteer": "^23.3.1",
+    "puppeteer-core": "^23.4.0",
     "tslib": "^2.7.0",
     "uuid": "^10.0.0",
     "zip-a-folder": "^3.1.7"

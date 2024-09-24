@@ -5,3 +5,4 @@ uploads/
 pdfs/
 pdfs.zip
 .env
+.env.example

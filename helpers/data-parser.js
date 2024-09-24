@@ -11,15 +11,8 @@ const storage = multer.diskStorage({
     }
 })
 
-const db = postgres({
-    host: 'localhost',
-    port: 5432,
-    database: 'lisaline',
-    user: 'kaushikkarandikar',
-})
-
 const upload = multer({storage: storage});
-let parsePDF = (filePath, batchId) => {
+let parsePDF = (filePath, batchId, db) => {
     return new Promise((resolve, reject) => {
         const pdfParser = new PDFParser(this, 1);
         let certificateData = {};
@@ -57,9 +50,6 @@ let parsePDF = (filePath, batchId) => {
                 referenceInstrumentation: {
                     model: pdfData.Pages[0].Texts[252].R[0].T,
                     brand: pdfData.Pages[0].Texts[278].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
-                    calibrationDate: pdfData.Pages[0].Texts[66].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                        + pdfData.Pages[0].Texts[67].R[0].T + pdfData.Pages[0].Texts[68].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
-                        + pdfData.Pages[0].Texts[69].R[0].T + pdfData.Pages[0].Texts[70].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
                     serialNumber: pdfData.Pages[0].Texts[292].R[0].T,
                     accuracy: pdfData.Pages[0].Texts[312].R[0].T + pdfData.Pages[0].Texts[313].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%')
                         + pdfData.Pages[0].Texts[314].R[0].T.replace(/%20/g, ' ').replace(/%C2%B0/g, '°').replace(/%25/g, '%'),
@@ -107,26 +97,33 @@ let parsePDF = (filePath, batchId) => {
     });
 }
 
-let parseExcel = async (filePath, batchId, inspector) => {
-    const parseResult = excelToJson({
-        sourceFile: filePath,
-        columnToKey: {
-            A: 'number',
-            B: 'modelNumber',
-            C: 'partNumber',
-            D: 'result'
-        },
-        header: {
-            rows: 1
+let parseExcel = async (filePath, batchId, calibrationDate, db) => {
+    try {
+        const parseResult = excelToJson({
+            sourceFile: filePath,
+            columnToKey: {
+                A: 'number',
+                B: 'partNumber',
+                C: 'serialNumber',
+                D: 'result'
+            },
+            header: {
+                rows: 1
+            }
+        });
+        const selectResponse = await db`select * from public."batch" where id=${batchId}`;
+        await db`update public."batch" set discrepancy=${selectResponse[0]?.quantity - parseResult["Sheet1"]?.length}, calibration_date=${calibrationDate} where id = ${batchId}`;
+        const inspectorId = selectResponse[0]?.inspector;
+        console.log(parseResult["Sheet1"], inspectorId);
+        for (let i = 0; i < parseResult["Sheet1"].length; i++) {
+            const result = parseResult["Sheet1"][i];
+            await db`insert into public."certificate" (batchid, inspector, serial_number, part_number) values (${batchId}, ${inspectorId}, ${result?.serialNumber}, ${result?.partNumber})`;
         }
-    });
-    const selectResponse = await db`select * from public."batch" where id = ${batchId}`;
-    await db`update public."batch" set discrepancy=${selectResponse[0]?.quantity - parseResult["Sheet1"]?.length} where id = ${batchId}`;
-    for (let i = 0; i < parseResult["Sheet1"].length; i++) {
-        const result = parseResult["Sheet1"][i];
-        // console.log(result);
-        await db`insert into public."certificate" (batchId, inspector, modelnumber, partnumber) values (${batchId}, , ${result?.modelNumber}, ${result?.serialNumber})`;
+    } catch (e) {
+        console.log(e);
+        throw new Error(e);
     }
+
 }
 
 module.exports = {

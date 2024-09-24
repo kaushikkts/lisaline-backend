@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const sendEmail = async (to, zip) => {
+const sendEmail = async (to, fileLocation) => {
     let configOptions = {
         host: "smtp-relay.brevo.com",
         port: 587,
@@ -16,13 +16,15 @@ const sendEmail = async (to, zip) => {
         from: 'admin@karandikartechsolutions.com',
         to: to,
         subject: "Certifcate of Calibration",
-        attachments: [
-            {
-                filename: 'certificate.zip',
-                content: zip,
-                contentType: 'application/zip'
-            }
-        ]
+        text: "Please click the link to download the certificate",
+        html: `<a href="${fileLocation}">Download Certificates</a>`
+        // attachments: [
+        //     {
+        //         filename: 'certificate.zip',
+        //         content: zip,
+        //         contentType: 'application/zip'
+        //     }
+        // ]
     }).then((info) => {
         console.log(info);
     }).catch((e) => {

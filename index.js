@@ -6,26 +6,37 @@ const { v4: uuidv4 } = require('uuid');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const {parseExcel, parsePDF, upload} = require('./helpers/data-parser');
-const fs = require('fs');
 const {generatePDFs} = require("./helpers/generate-pdf");
 const bcrypt = require('bcrypt');
+const fs = require("fs");
+const AWS = require("aws-sdk");
+const s3 = new AWS.S3({
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_KEY
+
+    }
+})
+
 app.use(cors());
 app.use(bodyParser.json());
 dotenv.config();
 
 const db = postgres({
-    host: 'localhost',
+    host: process.env.DB_HOST,
     port: 5432,
-    database: 'lisaline',
-    user: 'kaushikkarandikar',
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD
 })
 
 app.post('/api/batch', async (req, res) => {
     const {calibrationDate, quantity, inspector, batchNumber} = req.body;
     console.log(calibrationDate, quantity, inspector, batchNumber);
     try {
-        const insertResponse = await db`insert into public."batch" (id, batch_number, quantity, inspector, calibrationDate) values (${uuidv4()}, ${batchNumber}, ${quantity}, ${inspector}, ${calibrationDate}) returning id`;
-        res.json(insertResponse);
+        const insertResponse = await db`insert into public."batch" (id, batch_number, quantity, inspector, calibration_date) values (${uuidv4()}, ${batchNumber}, ${quantity}, ${inspector}, ${calibrationDate}) returning id`;
+        console.log('Creating new batch: - ',insertResponse);
+        res.status(200).json(insertResponse);
     } catch (e) {
         res.status(400).json({message: `Error while creating batch : - ${e}`});
     }
@@ -35,23 +46,62 @@ app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
 
     const masterCertificate = req.files.find(file => file.mimetype === 'application/pdf');
     const jungCSVFile = req.files.find(file => file.mimetype === 'application/vnd.ms-excel');
-    console.log(jungCSVFile);
-    let certificateData = {};
-    const updateResponse = await db`update public."batch" set master_cert=${masterCertificate?.path || null}, jung_csv=${jungCSVFile?.path || null} where id=${req.params?.id}`;
-    console.log(updateResponse);
+    const calibrationDate = jungCSVFile?.originalname.split('_').join(',').split('.')[0].split(',')[1];
+
 
     if (masterCertificate) {
-        certificateData = await parsePDF(masterCertificate?.path, req.params?.id);
+        try {
+            let file = fs.readFileSync(masterCertificate?.path);
+            const s3Upload = await s3.upload({
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: `${Date.now()}-${req.params?.id}-pdfs.zip`,
+                ACL: 'public-read',
+                Body: file,
+                ContentType: 'application/pdf'
+            }).promise();
+            await db`update public."batch" set master_cert=${s3Upload.Location} where id=${req.params?.id}`;
+            await parsePDF(masterCertificate?.path, req.params?.id, db);
+            const content = await db`select content from public."batch" where id=${req.params?.id}`;
+            console.log("Logging content: - ", content);
+            res.json({
+                batchId: req.params?.id,
+                message: "Master Certificate uploaded successfully, and data parsed",
+                data: content
+            });
+        } catch (e) {
+            res.status(400).json({message: `Error while uploading master certificate : - ${e}`});
+            return;
+        }
+
     }
 
     if (jungCSVFile) {
-        await parseExcel(jungCSVFile.path, req.params?.id);
+        // Check if master certificate is already uploaded
+        const batch = await db`select * from public."batch" where id=${req.params?.id}`;
+        if (!batch[0].master_cert) {
+            res.status(400).json({message: 'Master certificate is required before uploading Jung CSV file'});
+            return;
+        }
+        try {
+            let file = fs.readFileSync(jungCSVFile?.path);
+            const s3Upload = await s3.upload({
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: `${Date.now()}-${req.params?.id}-pdfs.zip`,
+                ACL: 'public-read',
+                Body: file,
+                ContentType: 'application/vnd.ms-excel'
+            }).promise();
+            await db`update public."batch" set jung_csv=${s3Upload.Location} where id=${req.params?.id}`;
+            await parseExcel(jungCSVFile.path, req.params?.id, calibrationDate, db);
+            res.json({
+                batchId: req.params?.id,
+                message: "Jung CSV uploaded successfully, and data parsed",
+            });
+        } catch (e) {
+            res.status(400).json({message: `Error while uploading Jung CSV file : - ${e}`});
+
+        }
     }
-    res.json({
-        batchId: req.params?.id,
-        certificateData: certificateData,
-        message: "Files uploaded successfully, and data parsed"
-    });
 });
 
 app.get('/api/review/:id', async (req, res) => {
@@ -64,20 +114,22 @@ app.get('/api/review/:id', async (req, res) => {
 app.post('/api/generatePDF', async (req, res) => {
     const {serialNumbers, emailToSend} = req.body;
     const queryArray = serialNumbers.replace(/ /g,'').split(',').map((serialNumber) => `%${serialNumber}%`);
-
-    const result = await db`select certificate.id,
+    try {
+        const result = await db`select certificate.id,
                                                     certificate.date::date,
-                                                    certificate.content,
-                                                    certificate.serialnumber,
-                                                    certificate.modelnumber,
-                                                    batch.calibrationdate::date,
-                                                    batch.inspectorname
-
+                                                    certificate.part_number,
+                                                    certificate.serial_number,
+                                                    batch.calibration_date::date,
+                                                    batch.content,
+                                                    u.first_name || ' ' || u.last_name as inspector
                                                       from public."certificate" inner join public."batch" on certificate.batchid = batch.id
-                                                      where certificate.serialnumber like any(${queryArray})` ;
-    generatePDFs(result, emailToSend);
-
-    res.json(result);
+                                                      inner join public."user" as u on batch.inspector = u.id
+                                                      where certificate.serial_number like any(${queryArray})` ;
+        generatePDFs(result, emailToSend);
+        res.status(200).json({message: 'PDF generation started. You will receive an email shortly.'});
+    } catch (e) {
+        res.status(400).json({message: `Error while generating PDFs : - ${e}`});
+    }
 })
 
 app.get('/health', (req, res) => {
@@ -123,7 +175,7 @@ app.get('/api/batch/:id', async (req, res) => {
         const result = await db`
             select 
                 b.id,
-                b.calibrationdate,
+                b.calibration_date,
                 b.batch_number,
                 b.arete_batch_number,
                 b.quantity,
@@ -134,7 +186,7 @@ app.get('/api/batch/:id', async (req, res) => {
                   from public."batch" as b inner join public."user" as u on b.inspector = u.id where b.inspector=${inspectorId}`;
         let batchData = [];
         for (let i = 0; i < result.length; i++) {
-            const date = new Date(result[i].calibrationdate);
+            const date = new Date(result[i].calibration_date);
             const formattedDate = date.toLocaleDateString('en-GB', {
                 day: 'numeric', month: 'short', year: 'numeric'
             }).replace(/ /g, '-')
