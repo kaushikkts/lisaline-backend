@@ -9,6 +9,8 @@ const {parseExcel, parsePDF, upload} = require('./helpers/data-parser');
 const {generatePDFs} = require("./helpers/generate-pdf");
 const bcrypt = require('bcrypt');
 const fs = require("fs");
+const {sendEmailWithAttachment} = require("./helpers/email-helper");
+const excel = require('node-excel-export');
 const AWS = require("aws-sdk");
 const s3 = new AWS.S3({
     credentials: {
@@ -130,7 +132,42 @@ app.post('/api/generatePDF', async (req, res) => {
     } catch (e) {
         res.status(400).json({message: `Error while generating PDFs : - ${e}`});
     }
-})
+});
+
+app.post('/api/report', async (req, res) => {
+    const {startDate, endDate} = req.body;
+    console.log(startDate, endDate);
+    try {
+        const result = await db`select distinct c.part_number, count(c.part_number), b.created_at, b.arete_batch_number, b.batch_number, b.quantity, u.first_name || ' ' || u.last_name as full_name
+                                    from batch as b inner join public."user" as u on b.inspector = u.id
+                                    inner join public.certificate c on b.id = c.batchid
+                                    where created_at between ${startDate} and ${endDate}
+                                    group by b.created_at, b.arete_batch_number, b.batch_number, b.quantity, u.first_name, u.last_name, c.part_number;`
+        const report = excel.buildExport([
+            {
+                name: 'Report',
+                specification: {
+                    part_number: {displayName: 'Part Number', headerStyle: 'header', width: 120},
+                    count: {displayName: 'Count', headerStyle: 'header', width: 120},
+                    created_at: {displayName: 'Created At', headerStyle: 'header', width: 120},
+                    arete_batch_number: {displayName: 'Arete Batch Number', headerStyle: 'header', width: 120},
+                    batch_number: {displayName: 'Batch Number', headerStyle: 'header', width: 120},
+                    quantity: {displayName: 'Quantity', headerStyle: 'header', width: 120},
+                    full_name: {displayName: 'Inspector', headerStyle: 'header', width: 120},
+                },
+                data: result
+            }
+        ]);
+        let blob = new Buffer.from(report);
+        fs.writeFileSync('report.xlsx', blob);
+        console.log(report);
+        await sendEmailWithAttachment('karanmakharia@gmail.com', './report.xlsx');
+        res.status(200).json({message: 'You will receive an email shortly with the requested report.', result: result});
+    } catch (e) {
+        res.status(400).json({message: `Error while generating report : - ${e}`});
+    }
+
+});
 
 app.get('/health', (req, res) => {
     console.log('Health check success');

@@ -1,17 +1,18 @@
 const nodemailer = require('nodemailer');
-const sendEmail = async (to, fileLocation) => {
-    let configOptions = {
-        host: "smtp-relay.brevo.com",
-        port: 587,
-        tls: {
-            rejectUnauthorized: true,
-            minVersion: "TLSv1.2"
-        },
-        auth: {
-            user: "7beb71001@smtp-brevo.com",
-            pass: "dRsBpKnyghtJHWX9"
-        }
+let configOptions = {
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    tls: {
+        rejectUnauthorized: true,
+        minVersion: "TLSv1.2"
+    },
+    auth: {
+        user: "7beb71001@smtp-brevo.com",
+        pass: "dRsBpKnyghtJHWX9"
     }
+}
+const sendEmail = async (to, fileLocation) => {
+
     nodemailer.createTransport(configOptions).sendMail({
         from: 'admin@karandikartechsolutions.com',
         to: to,
@@ -31,4 +32,26 @@ const sendEmail = async (to, fileLocation) => {
         console.log(e);
     });
 }
-module.exports = sendEmail;
+
+const sendEmailWithAttachment = async (to, file) => {
+    nodemailer.createTransport(configOptions).sendMail({
+        from: 'admin@karandikartechsolutions.com',
+        to: to,
+        subject: "Batch Report",
+        text: 'Please find the attached report',
+        attachments: [
+            {
+                filename: 'report.xlsx',
+                path: file,
+                contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+        ]
+    }).then((info) => {
+        console.log(info);
+    }).catch((e) => {
+        console.log(e);
+    });
+};
+
+
+module.exports = {sendEmail, sendEmailWithAttachment};

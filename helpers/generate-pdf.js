@@ -1,7 +1,7 @@
 const html_to_pdf = require("html-pdf-node");
 const fs = require("fs");
 const {zip, COMPRESSION_LEVEL} = require('zip-a-folder');
-const sendEmail = require("./email-helper");
+const {sendEmail} = require("./email-helper");
 const AWS = require('aws-sdk');
 const dotenv = require('dotenv');
 dotenv.config();
