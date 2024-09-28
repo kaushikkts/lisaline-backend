@@ -42,7 +42,7 @@ app.post('/api/batch', async (req, res) => {
     } catch (e) {
         res.status(400).json({message: `Error while creating batch : - ${e}`});
     }
-})
+});
 
 app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
 
@@ -135,7 +135,7 @@ app.post('/api/generatePDF', async (req, res) => {
 });
 
 app.post('/api/report', async (req, res) => {
-    const {startDate, endDate} = req.body;
+    const {startDate, endDate, email} = req.body;
     console.log(startDate, endDate);
     try {
         const result = await db`select distinct c.part_number, count(c.part_number), b.created_at, b.arete_batch_number, b.batch_number, b.quantity, u.first_name || ' ' || u.last_name as full_name
@@ -161,7 +161,7 @@ app.post('/api/report', async (req, res) => {
         let blob = new Buffer.from(report);
         fs.writeFileSync('report.xlsx', blob);
         console.log(report);
-        await sendEmailWithAttachment('karanmakharia@gmail.com', './report.xlsx');
+        await sendEmailWithAttachment(email, './report.xlsx');
         res.status(200).json({message: 'You will receive an email shortly with the requested report.', result: result});
     } catch (e) {
         res.status(400).json({message: `Error while generating report : - ${e}`});
