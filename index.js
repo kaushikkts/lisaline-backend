@@ -138,11 +138,11 @@ app.post('/api/report', async (req, res) => {
     const {startDate, endDate, email} = req.body;
     console.log(startDate, endDate);
     try {
-        const result = await db`select distinct c.part_number, count(c.part_number), b.created_at, b.arete_batch_number, b.batch_number, b.quantity, u.first_name || ' ' || u.last_name as full_name
+        const result = await db`select distinct c.part_number, count(c.part_number), b.created_at, b.arete_batch_number, b.remarks, b.batch_number, b.quantity, u.first_name || ' ' || u.last_name as full_name
                                     from batch as b inner join public."user" as u on b.inspector = u.id
                                     inner join public.certificate c on b.id = c.batchid
                                     where created_at between ${startDate} and ${endDate}
-                                    group by b.created_at, b.arete_batch_number, b.batch_number, b.quantity, u.first_name, u.last_name, c.part_number;`
+                                    group by b.created_at, b.arete_batch_number, b.remarks, b.batch_number, b.quantity, u.first_name, u.last_name, c.part_number;`
         const report = excel.buildExport([
             {
                 name: 'Report',
@@ -160,12 +160,23 @@ app.post('/api/report', async (req, res) => {
         ]);
         let blob = new Buffer.from(report);
         fs.writeFileSync('report.xlsx', blob);
-        console.log(report);
         await sendEmailWithAttachment(email, './report.xlsx');
         res.status(200).json({message: 'You will receive an email shortly with the requested report.', result: result});
     } catch (e) {
         res.status(400).json({message: `Error while generating report : - ${e}`});
     }
+});
+
+app.post('/api/update-batch', async (req, res) => {
+    try {
+        const {id, remarks, areteBatchNumber, quantity} = req.body;
+        console.log(id, remarks, areteBatchNumber, quantity);
+        await db`update public."batch" set remarks=${remarks}, quantity=${quantity}, arete_batch_number=${areteBatchNumber} where id=${id}`;
+        res.status(200).json({message: 'Batch updated successfully'});
+    } catch (e) {
+        res.status(400).json({message: `Error while updating batch : - ${e}`});
+    }
+
 
 });
 
@@ -216,6 +227,7 @@ app.get('/api/batch/:id', async (req, res) => {
                 b.batch_number,
                 b.arete_batch_number,
                 b.quantity,
+                b.remarks,
                 b.discrepancy,
                 b.master_cert,
                 b.jung_csv,
@@ -234,6 +246,7 @@ app.get('/api/batch/:id', async (req, res) => {
                 areteBatchNumber: result[i].arete_batch_number,
                 quantity: result[i].quantity,
                 discrepancy: result[i].discrepancy,
+                remarks: result[i].remarks,
                 masterCertificate: result[i].master_cert,
                 jungCSV: result[i].jung_csv,
                 inspector: result[i].inspectorname
