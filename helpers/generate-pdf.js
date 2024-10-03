@@ -310,16 +310,16 @@ async function generatePDFs(data, emailToSend) {
                <div class="t m0 xa h6 yf ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[2]?.setPoints}°C</div>
                <div class="t m0 xa h6 y10 ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[3]?.setPoints}°C</div>
                <div class="t m0 xa h6 y11 ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[4]?.setPoints}°C</div>
-               <div class="t m0 xe h6 yd ff2 fs4 fc2 sc0 ls0 ws0">±0.5°C</div>
-               <div class="t m0 xe h6 ye ff2 fs4 fc2 sc0 ls0 ws0">±0.5°C</div>
-               <div class="t m0 xe h6 yf ff2 fs4 fc2 sc0 ls0 ws0">±0.5°C</div>
-               <div class="t m0 xe h6 y10 ff2 fs4 fc2 sc0 ls0 ws0">±0.5°C</div>
-               <div class="t m0 xe h6 y11 ff2 fs4 fc2 sc0 ls0 ws0">±1°C</div>
-               <div class="t m0 xf h6 yd ff2 fs4 fc2 sc0 ls0 ws0">PASS</div>
-               <div class="t m0 xf h6 ye ff2 fs4 fc2 sc0 ls0 ws0">PASS</div>
-               <div class="t m0 xf h6 yf ff2 fs4 fc2 sc0 ls0 ws0">PASS</div>
-               <div class="t m0 xf h6 y10 ff2 fs4 fc2 sc0 ls0 ws0">PASS</div>
-               <div class="t m0 xf h6 y11 ff2 fs4 fc2 sc0 ls0 ws0">PASS</div>
+               <div class="t m0 xe h6 yd ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[0]?.deviation}°C</div>
+               <div class="t m0 xe h6 ye ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[1]?.deviation}°C</div>
+               <div class="t m0 xe h6 yf ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[2]?.deviation}°C</div>
+               <div class="t m0 xe h6 y10 ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[3]?.deviation}°C</div>
+               <div class="t m0 xe h6 y11 ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[4]?.deviation}°C</div>
+               <div class="t m0 xf h6 yd ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[0]?.result}</div>
+               <div class="t m0 xf h6 ye ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[1]?.result}</div>
+               <div class="t m0 xf h6 yf ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[2]?.result}</div>
+               <div class="t m0 xf h6 y10 ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[3]?.result}</div>
+               <div class="t m0 xf h6 y11 ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.temperatureValidation[4]?.result}</div>
                <div class="t m0 x3 h4 y12 ff1 fs2 fc1 sc0 ls0 ws0">Product Details</div>
                <div class="t m0 x4 h3 y13 ff1 fs1 fc1 sc0 ls0 ws0">Instrument:<span class="_ _7"> </span>Part Number:</div>
                <div class="t m0 x4 h3 y14 ff1 fs1 fc1 sc0 ls0 ws0">Serial Number:<span class="_ _8"> </span>Resolution:</div>
@@ -330,7 +330,7 @@ async function generatePDFs(data, emailToSend) {
                <div class="t m0 x5 h5 y19 ff1 fs3 fc1 sc0 ls0 ws0">ranges at ISO 17025 2017certified Calibration laboratory of Lisaline Lifescience Technologies Pvt. Ltd.</div>
                <div class="t m0 x5 h5 y1a ff1 fs3 fc1 sc0 ls0 ws0">For more details:<span class="_ _a"> </span><span class="ff2 fc2">info@mydegrite.com https://www.mydegrite.com</span></div>
                <div class="t m0 x10 h6 yc ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.serial_number.split('-')[0]}<span class="_ _b"> </span>${formattedDate(new Date())}</div>
-               <div class="t m0 x4 h6 y1b ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.referenceInstrumentation?.brand}<span class="_ _c"> </span>${certificate?.content?.referenceInstrumentation?.model}<span class="_ _d"> </span>${calibrationDate}<span class="_ _e"> </span>±0.5°C<span class="_ _f"> </span>75014010667</div>
+               <div class="t m0 x4 h6 y1b ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.referenceInstrumentation?.brand}<span class="_ _c"> </span>${certificate?.content?.referenceInstrumentation?.model}<span class="_ _d"> </span>${calibrationDate}<span class="_ _e"> </span>${certificate?.content?.referenceInstrumentation?.accuracy}   <span class="_ _d"> </span>${certificate?.content?.referenceInstrumentation?.serialNumber}</div>
                <div class="t m0 x11 h6 y1c ff2 fs4 fc2 sc0 ls0 ws0">25 ±5°C </div>
                <div class="t m0 x11 h6 y1d ff2 fs4 fc2 sc0 ls0 ws0">50 ±15°%</div>
                <div class="t m0 x12 h6 y13 ff1 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.productDetails?.name}</div>

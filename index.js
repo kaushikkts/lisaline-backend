@@ -217,6 +217,17 @@ app.post('/api/login', async (req, res) => {
     });
 });
 
+app.put('/api/update-certificate-data/:id', async (req, res) => {
+    const certificate = req.body;
+    const batchId = req.params?.id;
+    try {
+        const updateResponse = await db`update public."batch" set content=${certificate} where id=${batchId}`;
+        res.status(200).json(updateResponse);
+    } catch (e) {
+        res.status(400).json({message: `Error while updating certificate data: - ${e}`});
+    }
+});
+
 app.get('/api/batch/:id', async (req, res) => {
     const inspectorId = req.params?.id;
     try {
