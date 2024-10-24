@@ -7,8 +7,8 @@ let configOptions = {
         minVersion: "TLSv1.2"
     },
     auth: {
-        user: "7beb71001@smtp-brevo.com",
-        pass: "dRsBpKnyghtJHWX9"
+        user: "",
+        pass: ""
     }
 }
 const sendEmail = async (to, fileLocation) => {

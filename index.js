@@ -5,7 +5,7 @@ const app = require('express')();
 const { v4: uuidv4 } = require('uuid');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const {parseExcel, parsePDF, upload} = require('./helpers/data-parser');
+const {parseExcel, parsePDF, upload, parseMasterCertificate} = require('./helpers/data-parser');
 const {generatePDFs} = require("./helpers/generate-pdf");
 const bcrypt = require('bcrypt');
 const fs = require("fs");
@@ -46,7 +46,7 @@ app.post('/api/batch', async (req, res) => {
 
 app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
 
-    const masterCertificate = req.files.find(file => file.mimetype === 'application/pdf');
+    const masterCertificate = req.files.find(file => file.mimetype === 'application/vnd.ms-excel');
     const jungCSVFile = req.files.find(file => file.mimetype === 'application/vnd.ms-excel');
     const calibrationDate = jungCSVFile?.originalname.split('_').join(',').split('.')[0].split(',')[1];
 
@@ -62,7 +62,7 @@ app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
                 ContentType: 'application/pdf'
             }).promise();
             await db`update public."batch" set master_cert=${s3Upload.Location} where id=${req.params?.id}`;
-            await parsePDF(masterCertificate?.path, req.params?.id, db);
+            await parseMasterCertificate(masterCertificate?.path, req.params?.id, db);
             const content = await db`select content from public."batch" where id=${req.params?.id}`;
             console.log("Logging content: - ", content);
             res.json({
@@ -182,6 +182,7 @@ app.post('/api/update-batch', async (req, res) => {
 
 app.get('/health', (req, res) => {
     console.log('Health check success');
+    parseMasterCertificate('', '', db);
     res.status(200).json({message: 'Health check success'});
 });
 

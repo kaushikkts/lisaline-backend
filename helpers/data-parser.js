@@ -12,6 +12,70 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({storage: storage});
+
+let parseMasterCertificate = async (filePath, batchId, db) => {
+    try {
+        const response = excelToJson({
+            sourceFile: filePath
+        })
+        let masterCertificate = response["Sheet1"];
+        masterCertificate.forEach((el, index) => el["index"] = index);
+
+        const certificateData = {
+            areteBatchNumber: masterCertificate[14]['B'],
+            productDetails: {
+                name: masterCertificate[13]['B'],
+                type: masterCertificate[15]['D'],
+                resolution: masterCertificate[16]['D'],
+                range: masterCertificate[14]['D']
+            },
+            referenceInstrumentation: {
+                model: masterCertificate[17]['D'],
+                brand: masterCertificate[20]['D'],
+                serialNumber: masterCertificate[23]['B'],
+                accuracy: '±' + masterCertificate[24]['D']
+            },
+            temperatureValidation: [
+                {
+                    setPoints: masterCertificate[27]['A'],
+                    deviation: masterCertificate[27]['D'],
+                    result: masterCertificate[27]['E']
+                },
+                {
+                    setPoints: masterCertificate[28]['A'],
+                    deviation: masterCertificate[28]['D'],
+                    result: masterCertificate[28]['E']
+                },
+                {
+                    setPoints: masterCertificate[29]['A'],
+                    deviation: masterCertificate[29]['D'],
+                    result: masterCertificate[29]['E']
+                },
+                {
+                    setPoints: masterCertificate[30]['A'],
+                    deviation: masterCertificate[30]['D'],
+                    result: masterCertificate[30]['E']
+                },
+                {
+                    setPoints: masterCertificate[31]['A'],
+                    deviation: masterCertificate[31]['D'],
+                    result: masterCertificate[31]['E']
+                }
+            ],
+            temperatureAndHumidity: {
+                temperature: masterCertificate[7]['B'],
+                humidity: masterCertificate[8]['B']
+            }
+        }
+
+        console.log(certificateData);
+        await db`update public."batch" set content=${certificateData}, arete_batch_number=${certificateData.areteBatchNumber} where id = ${batchId}`;
+
+    } catch (e) {
+        console.log(e);
+        throw new Error(e);
+    }
+};
 let parsePDF = (filePath, batchId, db) => {
     return new Promise((resolve, reject) => {
         const pdfParser = new PDFParser(this, 1);
@@ -137,5 +201,6 @@ let parseExcel = async (filePath, batchId, calibrationDate, db) => {
 module.exports = {
     parsePDF,
     parseExcel,
+    parseMasterCertificate,
     upload
 }
