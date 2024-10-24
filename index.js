@@ -44,13 +44,8 @@ app.post('/api/batch', async (req, res) => {
     }
 });
 
-app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
-
-    const masterCertificate = req.files.find(file => file.mimetype === 'application/vnd.ms-excel');
-    const jungCSVFile = req.files.find(file => file.mimetype === 'application/vnd.ms-excel');
-    const calibrationDate = jungCSVFile?.originalname.split('_').join(',').split('.')[0].split(',')[1];
-
-
+app.post('/api/batch/files/master-certificate/:id', upload.any(), async (req, res) => {
+    const masterCertificate = req.files.find(file => file.mimetype === 'application/vnd.ms-excel' || file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     if (masterCertificate) {
         try {
             let file = fs.readFileSync(masterCertificate?.path);
@@ -72,10 +67,15 @@ app.post('/api/batch/files/:id', upload.any(), async (req, res) => {
             });
         } catch (e) {
             res.status(400).json({message: `Error while uploading master certificate : - ${e}`});
-            return;
         }
-
     }
+});
+
+app.post('/api/batch/files/jung-csv/:id', upload.any(), async (req, res) => {
+
+    const jungCSVFile = req.files.find(file => file.mimetype === 'application/vnd.ms-excel' || file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    const calibrationDate = jungCSVFile?.originalname.split('_').join(',').split('.')[0].split(',')[1];
+
 
     if (jungCSVFile) {
         // Check if master certificate is already uploaded
@@ -114,7 +114,7 @@ app.get('/api/review/:id', async (req, res) => {
 
 
 app.post('/api/generatePDF', async (req, res) => {
-    const {serialNumbers, emailToSend} = req.body;
+    const {serialNumbers, email} = req.body;
     const queryArray = serialNumbers.replace(/ /g,'').split(',').map((serialNumber) => `%${serialNumber}%`);
     try {
         const result = await db`select certificate.id,
@@ -127,7 +127,7 @@ app.post('/api/generatePDF', async (req, res) => {
                                                       from public."certificate" inner join public."batch" on certificate.batchid = batch.id
                                                       inner join public."user" as u on batch.inspector = u.id
                                                       where certificate.serial_number like any(${queryArray})` ;
-        generatePDFs(result, emailToSend);
+        generatePDFs(result, email);
         res.status(200).json({message: 'PDF generation started. You will receive an email shortly.'});
     } catch (e) {
         res.status(400).json({message: `Error while generating PDFs : - ${e}`});
