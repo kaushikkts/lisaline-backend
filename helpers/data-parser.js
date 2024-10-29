@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({storage: storage});
-
+const csvToJson=require('csvtojson')
 let parseMasterCertificate = async (filePath, batchId, db) => {
     try {
         const response = excelToJson({
@@ -171,26 +171,20 @@ let parsePDF = (filePath, batchId, db) => {
 
 let parseExcel = async (filePath, batchId, calibrationDate, db) => {
     try {
-        const parseResult = excelToJson({
-            sourceFile: filePath,
-            columnToKey: {
-                A: 'number',
-                B: 'partNumber',
-                C: 'serialNumber',
-                D: 'result'
-            },
-            header: {
-                rows: 1
-            }
-        });
+
+        const dataFromCSV = await csvToJson().fromFile(filePath);
         const selectResponse = await db`select * from public."batch" where id=${batchId}`;
-        await db`update public."batch" set discrepancy=${selectResponse[0]?.quantity - parseResult["Sheet1"]?.length}, calibration_date=${calibrationDate} where id = ${batchId}`;
+        console.log(selectResponse[0]?.quantity, dataFromCSV.length)
+        await db`update public."batch" set discrepancy=${selectResponse[0]?.quantity - dataFromCSV?.length}, calibration_date=${calibrationDate} where id = ${batchId}`;
         const inspectorId = selectResponse[0]?.inspector;
-        console.log(parseResult["Sheet1"], inspectorId);
-        for (let i = 0; i < parseResult["Sheet1"].length; i++) {
-            const result = parseResult["Sheet1"][i];
-            await db`insert into public."certificate" (batchid, inspector, serial_number, part_number) values (${batchId}, ${inspectorId}, ${result?.serialNumber}, ${result?.partNumber})`;
+        for (let i = 0; i < dataFromCSV.length; i++) {
+            const result = dataFromCSV[i];
+            console.log(result['Sr']['NO;Part No;Sr'][' No;Remarks'].split(';'));
+            const serialNo = result['Sr']['NO;Part No;Sr'][' No;Remarks'].split(';')[2];
+            const partNo = result['Sr']['NO;Part No;Sr'][' No;Remarks'].split(';')[1];
+            await db`insert into public."certificate" (batchid, inspector, serial_number, part_number) values (${batchId}, ${inspectorId}, ${serialNo}, ${partNo})`;
         }
+
     } catch (e) {
         console.log(e);
         throw new Error(e);

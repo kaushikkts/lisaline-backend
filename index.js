@@ -45,7 +45,11 @@ app.post('/api/batch', async (req, res) => {
 });
 
 app.post('/api/batch/files/master-certificate/:id', upload.any(), async (req, res) => {
-    const masterCertificate = req.files.find(file => file.mimetype === 'application/vnd.ms-excel' || file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    const masterCertificate = req.files.find(file => file.mimetype === 'application/vnd.ms-excel'
+        ||
+        file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ||
+        file.mimetype === 'text/csv');
     if (masterCertificate) {
         try {
             let file = fs.readFileSync(masterCertificate?.path);
@@ -54,7 +58,7 @@ app.post('/api/batch/files/master-certificate/:id', upload.any(), async (req, re
                 Key: `${Date.now()}-${req.params?.id}-pdfs.zip`,
                 ACL: 'public-read',
                 Body: file,
-                ContentType: 'application/pdf'
+                ContentType: 'application/vnd.ms-excel'
             }).promise();
             await db`update public."batch" set master_cert=${s3Upload.Location} where id=${req.params?.id}`;
             await parseMasterCertificate(masterCertificate?.path, req.params?.id, db);
@@ -73,7 +77,13 @@ app.post('/api/batch/files/master-certificate/:id', upload.any(), async (req, re
 
 app.post('/api/batch/files/jung-csv/:id', upload.any(), async (req, res) => {
 
-    const jungCSVFile = req.files.find(file => file.mimetype === 'application/vnd.ms-excel' || file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    const jungCSVFile = req.files.find(file =>
+        file.mimetype === 'application/vnd.ms-excel'
+        ||
+        file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ||
+        file.mimetype === 'text/csv'
+    );
     const calibrationDate = jungCSVFile?.originalname.split('_').join(',').split('.')[0].split(',')[1];
 
 
