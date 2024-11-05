@@ -20,6 +20,7 @@ let parseMasterCertificate = async (filePath, batchId, db) => {
         })
         let masterCertificate = response["Sheet1"];
         masterCertificate.forEach((el, index) => el["index"] = index);
+        console.log(masterCertificate);
 
         const certificateData = {
             areteBatchNumber: masterCertificate[14]['B'],
@@ -30,8 +31,9 @@ let parseMasterCertificate = async (filePath, batchId, db) => {
                 range: masterCertificate[14]['D']
             },
             referenceInstrumentation: {
-                model: masterCertificate[17]['D'],
+                model: masterCertificate[22]['B'],
                 brand: masterCertificate[20]['D'],
+                referenceCalibrationDate: masterCertificate[6]['D'],
                 serialNumber: masterCertificate[23]['B'],
                 accuracy: '±' + masterCertificate[24]['D']
             },

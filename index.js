@@ -124,7 +124,8 @@ app.get('/api/review/:id', async (req, res) => {
 
 
 app.post('/api/generatePDF', async (req, res) => {
-    const {serialNumbers, email} = req.body;
+    const serialNumbers = req.body['Serial Numbers'];
+    const email = req.body['Email'];
     const queryArray = serialNumbers.replace(/ /g,'').split(',').map((serialNumber) => `%${serialNumber}%`);
     try {
         const result = await db`select certificate.id,
