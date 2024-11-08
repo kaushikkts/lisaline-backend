@@ -22,6 +22,7 @@ const s3 = new AWS.S3({
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 dotenv.config();
 
 const db = postgres({
@@ -34,7 +35,7 @@ const db = postgres({
 
 app.post('/api/batch', async (req, res) => {
     const {calibrationDate, quantity, inspector, batchNumber} = req.body;
-    console.log(calibrationDate, quantity, inspector, batchNumber);
+    console.log("Entering /api/batch method: - ", calibrationDate, quantity, inspector, batchNumber);
     try {
         const insertResponse = await db`insert into public."batch" (id, batch_number, quantity, inspector, calibration_date) values (${uuidv4()}, ${batchNumber}, ${quantity}, ${inspector}, ${calibrationDate}) returning id`;
         console.log('Creating new batch: - ',insertResponse);
@@ -126,6 +127,7 @@ app.get('/api/review/:id', async (req, res) => {
 app.post('/api/generatePDF', async (req, res) => {
     const serialNumbers = req.body['Serial Numbers'];
     const email = req.body['Email'];
+    console.log('Entering generate pdf method: - ', serialNumbers, email);
     const queryArray = serialNumbers.replace(/ /g,'').split(',').map((serialNumber) => `%${serialNumber}%`);
     try {
         const result = await db`select certificate.id,
