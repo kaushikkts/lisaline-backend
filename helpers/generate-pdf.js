@@ -16,7 +16,7 @@ const s3 = new AWS.S3({
 const puppeteer = require('puppeteer');
 
 
-async function generatePDFs(data, emailToSend) {
+async function generatePDFs(data, emailToSend, serialNumbers) {
 
     for (const certificate of data) {
         const referenceInstrumentationDate = moment(certificate?.content?.referenceInstrumentation?.referenceCalibrationDate).subtract(1, 'year').add(1, 'day').format('DD-MM-YYYY');
@@ -350,8 +350,8 @@ async function generatePDFs(data, emailToSend) {
 `
         };
         const browser = await puppeteer.launch({
-            // executablePath: '/usr/bin/chromium-browser',
-            // args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote']
+            executablePath: '/usr/bin/chromium-browser',
+            args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote']
         });
         const page = await browser.newPage();
         await page.setContent(file.content);
@@ -382,7 +382,7 @@ async function generatePDFs(data, emailToSend) {
                 Body: file,
                 ContentType: 'application/zip'
             }).promise();
-            sendEmail(emailToSend, s3Upload.Location).then(() => {
+            sendEmail(emailToSend, s3Upload.Location, serialNumbers).then(() => {
                 console.log('Email sent');
             }).catch((e) => {
                 console.log(e);

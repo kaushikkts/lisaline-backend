@@ -140,7 +140,7 @@ app.post('/api/generatePDF', async (req, res) => {
                                                       from public."certificate" inner join public."batch" on certificate.batchid = batch.id
                                                       inner join public."user" as u on batch.inspector = u.id
                                                       where certificate.serial_number like any(${queryArray})` ;
-        generatePDFs(result, email);
+        generatePDFs(result, email, serialNumbers);
         res.status(200).json({message: 'PDF generation started. You will receive an email shortly.'});
     } catch (e) {
         res.status(400).json({message: `Error while generating PDFs : - ${e}`});
