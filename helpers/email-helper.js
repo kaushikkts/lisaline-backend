@@ -11,13 +11,13 @@ let configOptions = {
         pass: ""
     }
 }
-const sendEmail = async (to, fileLocation) => {
+const sendEmail = async (to, fileLocation, serialNumbers) => {
 
     nodemailer.createTransport(configOptions).sendMail({
         from: 'admin@karandikartechsolutions.com',
         to: to,
         subject: "Certifcate of Calibration",
-        text: "Please click the link to download the certificate",
+        text: `Please click the link to download the certificate for the following serial numbers: - ${serialNumbers}`,
         html: `<a href="${fileLocation}">Download Certificates</a>`
         // attachments: [
         //     {
