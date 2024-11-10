@@ -51,12 +51,13 @@ app.post('/api/batch/files/master-certificate/:id', upload.any(), async (req, re
         file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         ||
         file.mimetype === 'text/csv');
+    console.log(masterCertificate);
     if (masterCertificate) {
         try {
             let file = fs.readFileSync(masterCertificate?.path);
             const s3Upload = await s3.upload({
                 Bucket: process.env.AWS_BUCKET_NAME,
-                Key: `${Date.now()}-${req.params?.id}-pdfs.zip`,
+                Key: `${Date.now()}-${req.params?.id}-${masterCertificate?.originalname}`,
                 ACL: 'public-read',
                 Body: file,
                 ContentType: 'application/vnd.ms-excel'
@@ -99,7 +100,7 @@ app.post('/api/batch/files/jung-csv/:id', upload.any(), async (req, res) => {
             let file = fs.readFileSync(jungCSVFile?.path);
             const s3Upload = await s3.upload({
                 Bucket: process.env.AWS_BUCKET_NAME,
-                Key: `${Date.now()}-${req.params?.id}-pdfs.zip`,
+                Key: `${Date.now()}-${req.params?.id}-${jungCSVFile.originalname}`,
                 ACL: 'public-read',
                 Body: file,
                 ContentType: 'application/vnd.ms-excel'
