@@ -172,9 +172,19 @@ app.post('/api/report', async (req, res) => {
                 data: result
             }
         ]);
+        console.log(report);
         let blob = new Buffer.from(report);
         fs.writeFileSync('report.xlsx', blob);
-        await sendEmailWithAttachment(email, './report.xlsx');
+        let file = fs.readFileSync('./report.xlsx');
+        const reportUpload = await s3.upload({
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: `${Date.now()}-report.xlsx`,
+            ACL: 'public-read',
+            Body: file,
+            ContentType: 'application/vnd.ms-excel'
+        }).promise();
+        sendEmailWithAttachment(email, reportUpload.Location);
+        fs.unlinkSync('./report.xlsx');
         res.status(200).json({message: 'You will receive an email shortly with the requested report.', result: result});
     } catch (e) {
         res.status(400).json({message: `Error while generating report : - ${e}`});

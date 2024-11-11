@@ -41,13 +41,16 @@ const sendEmailWithAttachment = async (to, file) => {
         to: to,
         subject: "Batch Report",
         text: 'Please find the attached report',
-        attachments: [
-            {
-                filename: 'report.xlsx',
-                path: file,
-                contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            }
-        ]
+        html: `
+            <p>Please click the link to download the report</p>
+            <a href="${file}">Download Report</a>`
+        // attachments: [
+        //     {
+        //         filename: 'report.xlsx',
+        //         path: file,
+        //         contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        //     }
+        // ]
     }).then((info) => {
         console.log(info);
     }).catch((e) => {

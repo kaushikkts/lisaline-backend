@@ -33,7 +33,7 @@ let parseMasterCertificate = async (filePath, batchId, db) => {
             referenceInstrumentation: {
                 model: masterCertificate[22]['B'],
                 brand: masterCertificate[20]['D'],
-                referenceCalibrationDate: masterCertificate[6]['D'],
+                referenceCalibrationDate: masterCertificate[21]['B'],
                 serialNumber: masterCertificate[23]['B'],
                 accuracy: '±' + masterCertificate[24]['D']
             },
