@@ -137,6 +137,7 @@ app.post('/api/generatePDF', async (req, res) => {
                                                     certificate.serial_number,
                                                     batch.calibration_date::date,
                                                     batch.content,
+                                                    batch.validity_date,
                                                     u.first_name || ' ' || u.last_name as inspector
                                                       from public."certificate" inner join public."batch" on certificate.batchid = batch.id
                                                       inner join public."user" as u on batch.inspector = u.id
@@ -206,7 +207,6 @@ app.post('/api/update-batch', async (req, res) => {
 
 app.get('/health', (req, res) => {
     console.log('Health check success');
-    parseMasterCertificate('', '', db);
     res.status(200).json({message: 'Health check success'});
 });
 

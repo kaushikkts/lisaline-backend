@@ -17,11 +17,8 @@ const puppeteer = require('puppeteer');
 
 
 async function generatePDFs(data, emailToSend, serialNumbers) {
-
     for (const certificate of data) {
-        const referenceInstrumentationDate = moment(certificate?.content?.referenceInstrumentation?.referenceCalibrationDate).subtract(1, 'year').add(1, 'day').format('DD-MM-YYYY');
-        const calibrationDate = moment(certificate?.calibration_date).format('DD-MM-YYYY');
-
+        const calibrationDate = moment.utc(certificate?.calibration_date).format('DD-MM-YYYY');
         let file = {
             content: `
 
@@ -329,7 +326,7 @@ async function generatePDFs(data, emailToSend, serialNumbers) {
                <div class="t m0 x5 h5 y19 ff1 fs3 fc1 sc0 ls0 ws0">ranges at ISO 17025 2017certified Calibration laboratory of Lisaline Lifescience Technologies Pvt. Ltd.</div>
                <div class="t m0 x5 h5 y1a ff1 fs3 fc1 sc0 ls0 ws0">For more details:<span class="_ _a"> </span><span class="ff2 fc2">info@mydegrite.com https://www.mydegrite.com</span></div>
                <div class="t m0 x10 h6 yc ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.serial_number.split('-')[0]}<span class="_ _b"> </span>${calibrationDate}</div>
-               <div class="t m0 x4 h6 y1b ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.referenceInstrumentation?.brand}<span class="_ _c"> </span>${certificate?.content?.referenceInstrumentation?.model}<span class="_ _d"> </span>${referenceInstrumentationDate}<span class="_ _e"> </span>±0.5 °C<span class="_ _d"> </span>     ${certificate?.content?.referenceInstrumentation?.serialNumber}</div>
+               <div class="t m0 x4 h6 y1b ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.referenceInstrumentation?.brand}<span class="_ _c"> </span>${certificate?.content?.referenceInstrumentation?.model}<span class="_ _d"> </span>${certificate?.validity_date}<span class="_ _e"> </span>±0.5 °C<span class="_ _d"> </span>     ${certificate?.content?.referenceInstrumentation?.serialNumber}</div>
                <div class="t m0 x11 h6 y1c ff2 fs4 fc2 sc0 ls0 ws0">25 ±5°C </div>
                <div class="t m0 x11 h6 y1d ff2 fs4 fc2 sc0 ls0 wso">50 ±15%</div>
                <div class="t m0 x12 h6 y13 ff2 fs4 fc2 sc0 ls0 wso">${certificate?.content?.productDetails?.name}</div>

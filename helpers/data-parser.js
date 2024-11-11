@@ -13,6 +13,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage: storage});
 const csvToJson=require('csvtojson')
+const moment = require("moment/moment");
 let parseMasterCertificate = async (filePath, batchId, db) => {
     try {
         const response = excelToJson({
@@ -20,7 +21,6 @@ let parseMasterCertificate = async (filePath, batchId, db) => {
         })
         let masterCertificate = response["Sheet1"];
         masterCertificate.forEach((el, index) => el["index"] = index);
-        console.log(masterCertificate);
 
         const certificateData = {
             areteBatchNumber: masterCertificate[14]['B'],
@@ -69,9 +69,8 @@ let parseMasterCertificate = async (filePath, batchId, db) => {
                 humidity: masterCertificate[8]['B']
             }
         }
-
-        console.log(certificateData);
-        await db`update public."batch" set content=${certificateData}, arete_batch_number=${certificateData.areteBatchNumber} where id = ${batchId}`;
+        const validityDate = moment.utc(certificateData?.referenceInstrumentation?.referenceCalibrationDate).subtract(1, 'year').add(1, 'day').add(6, 'hours').format('DD-MM-YYYY');
+        await db`update public."batch" set content=${certificateData}, arete_batch_number=${certificateData.areteBatchNumber}, validity_date=${validityDate} where id = ${batchId}`;
 
     } catch (e) {
         console.log(e);
