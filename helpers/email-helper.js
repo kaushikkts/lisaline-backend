@@ -1,3 +1,5 @@
+const dotenv = require('dotenv');
+dotenv.config();
 const nodemailer = require('nodemailer');
 let configOptions = {
     host: "smtp-relay.brevo.com",
@@ -7,27 +9,20 @@ let configOptions = {
         minVersion: "TLSv1.2"
     },
     auth: {
-        user: "",
-        pass: ""
+        user: process.env.BREVO_USERNAME,
+        pass: process.env.BREVO_PASSWORD
     }
 }
 const sendEmail = async (to, fileLocation, serialNumbers) => {
 
     nodemailer.createTransport(configOptions).sendMail({
-        from: 'admin@karandikartechsolutions.com',
+        from: 'certificate@mydegrite.com',
         to: to,
         subject: "Certificate of Calibration",
         text: `Please click the link to download the certificate for the following serial numbers: - ${serialNumbers}`,
         html: `
             <p>Please click the link to download the certificate for the following serial numbers: - ${serialNumbers}</p>
             <a href="${fileLocation}">Download Certificates</a>`
-        // attachments: [
-        //     {
-        //         filename: 'certificate.zip',
-        //         content: zip,
-        //         contentType: 'application/zip'
-        //     }
-        // ]
     }).then((info) => {
         console.log(info);
     }).catch((e) => {
@@ -37,7 +32,7 @@ const sendEmail = async (to, fileLocation, serialNumbers) => {
 
 const sendEmailWithAttachment = async (to, file) => {
     nodemailer.createTransport(configOptions).sendMail({
-        from: 'admin@karandikartechsolutions.com',
+        from: 'reports@mydegrite.com',
         to: to,
         subject: "Batch Report",
         text: 'Please find the attached report',

@@ -296,7 +296,7 @@ async function generatePDFs(data, emailToSend, serialNumbers) {
                <div class="t m0 x5 h4 y7 ff1 fs2 fc1 sc0 ls0 ws0">Environment Conditions</div>
                <div class="t m0 x6 h3 y8 ff1 fs1 fc1 sc0 ls0 ws0">Air Temperature</div>
                <div class="t m0 x7 h3 y9 ff1 fs1 fc1 sc0 ls0 ws0">Relative Humidity</div>
-               <div class="t m0 x8 h4 y7 ff1 fs2 fc1 sc0 ls0 ws0">Temperature Validation</div>
+               <div class="t m0 x8 h4 y7 ff1 fs2 fc1 sc0 ls0 ws0">Temperature Points</div>
                <div class="t m0 x9 h3 ya ff1 fs1 fc1 sc0 ls0 ws0">Set Points</div>
                <div class="t m0 xa h3 yb ff1 fs1 fc1 sc0 ls0 ws0"></div>
                <div class="t m0 xb h3 ya ff1 fs1 fc1 sc0 ls0 ws0">Deviation<span class="_ _6"> </span>Result</div>

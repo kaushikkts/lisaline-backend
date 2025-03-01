@@ -33,7 +33,7 @@ let parseMasterCertificate = async (filePath, batchId, db) => {
             referenceInstrumentation: {
                 model: masterCertificate[22]['B'],
                 brand: masterCertificate[20]['D'],
-                referenceCalibrationDate: masterCertificate[21]['B'],
+                referenceCalibrationDate: moment.utc(masterCertificate[21]['B']).add(6, "hours").format("DD-MM-YYYY"),
                 serialNumber: masterCertificate[23]['B'],
                 accuracy: '±' + masterCertificate[24]['D']
             },

@@ -12,11 +12,11 @@ const fs = require("fs");
 const {sendEmailWithAttachment} = require("./helpers/email-helper");
 const excel = require('node-excel-export');
 const AWS = require("aws-sdk");
+const moment = require("moment/moment");
 const s3 = new AWS.S3({
     credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY,
         secretAccessKey: process.env.AWS_SECRET_KEY
-
     }
 })
 
@@ -54,6 +54,16 @@ app.post('/api/batch/files/master-certificate/:id', upload.any(), async (req, re
     console.log(masterCertificate);
     if (masterCertificate) {
         try {
+            await parseMasterCertificate(masterCertificate?.path, req.params?.id, db);
+            const contentData = await db`select content from public."batch" where id=${req.params?.id}`;
+            const today = moment();
+            const dateToCompare = contentData[0]?.content?.referenceInstrumentation?.referenceCalibrationDate.split('-').reverse().join('-');
+            let validityDate = moment(dateToCompare)
+            const diff = validityDate.diff(today, 'days');
+            if (diff < 30) {
+                res.status(406).json({message: 'The validity date on the certificate must more than 30 days from today.'})
+                return;
+            }
             let file = fs.readFileSync(masterCertificate?.path);
             const s3Upload = await s3.upload({
                 Bucket: process.env.AWS_BUCKET_NAME,
@@ -62,14 +72,12 @@ app.post('/api/batch/files/master-certificate/:id', upload.any(), async (req, re
                 Body: file,
                 ContentType: 'application/vnd.ms-excel'
             }).promise();
+            console.log("Logging content: - ", JSON.stringify(contentData[0]?.content?.referenceInstrumentation?.referenceCalibrationDate));
             await db`update public."batch" set master_cert=${s3Upload.Location} where id=${req.params?.id}`;
-            await parseMasterCertificate(masterCertificate?.path, req.params?.id, db);
-            const content = await db`select content from public."batch" where id=${req.params?.id}`;
-            console.log("Logging content: - ", content);
             res.json({
                 batchId: req.params?.id,
                 message: "Master Certificate uploaded successfully, and data parsed",
-                data: content
+                data: contentData
             });
         } catch (e) {
             res.status(400).json({message: `Error while uploading master certificate : - ${e}`});
