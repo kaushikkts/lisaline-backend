@@ -55,9 +55,9 @@ app.post('/api/batch/files/master-certificate/:id', upload.any(), async (req, re
     if (masterCertificate) {
         try {
             await parseMasterCertificate(masterCertificate?.path, req.params?.id, db);
-            const contentData = await db`select content from public."batch" where id=${req.params?.id}`;
+            const content = await db`select content from public."batch" where id=${req.params?.id}`;
             const today = moment();
-            const dateToCompare = contentData[0]?.content?.referenceInstrumentation?.referenceCalibrationDate.split('-').reverse().join('-');
+            const dateToCompare = content[0]?.content?.referenceInstrumentation?.referenceCalibrationDate.split('-').reverse().join('-');
             let validityDate = moment(dateToCompare)
             const diff = validityDate.diff(today, 'days');
             if (diff < 30) {
@@ -72,12 +72,11 @@ app.post('/api/batch/files/master-certificate/:id', upload.any(), async (req, re
                 Body: file,
                 ContentType: 'application/vnd.ms-excel'
             }).promise();
-            console.log("Logging content: - ", JSON.stringify(contentData[0]?.content?.referenceInstrumentation?.referenceCalibrationDate));
             await db`update public."batch" set master_cert=${s3Upload.Location} where id=${req.params?.id}`;
             res.json({
                 batchId: req.params?.id,
                 message: "Master Certificate uploaded successfully, and data parsed",
-                data: contentData
+                data: content
             });
         } catch (e) {
             res.status(400).json({message: `Error while uploading master certificate : - ${e}`});
@@ -136,21 +135,23 @@ app.get('/api/review/:id', async (req, res) => {
 app.post('/api/generatePDF', async (req, res) => {
     const serialNumbers = req.body['Serial Numbers'];
     const email = req.body['Email'];
-    console.log('Entering generate pdf method: - ', serialNumbers, email);
-    const queryArray = serialNumbers.replace(/ /g,'').split(',').map((serialNumber) => `%${serialNumber}%`);
+    const certificates = req.body['Certificates']?.split(",").map((certificate) => `%${serialNumbers}-${certificate}%`.split(" ").join(""));
+    console.log(certificates)
     try {
         const result = await db`select certificate.id,
-                                                    certificate.date::date,
-                                                    certificate.part_number,
-                                                    certificate.serial_number,
-                                                    batch.calibration_date::date,
-                                                    batch.content,
-                                                    batch.validity_date,
-                                                    u.first_name || ' ' || u.last_name as inspector
-                                                      from public."certificate" inner join public."batch" on certificate.batchid = batch.id
-                                                      inner join public."user" as u on batch.inspector = u.id
-                                                      where certificate.serial_number like any(${queryArray})` ;
+                                                certificate.date::date,
+                                                certificate.part_number,
+                                                certificate.serial_number,
+                                                batch.calibration_date::date,
+                                                batch.content,
+                                                batch.validity_date,
+                                                u.first_name || ' ' || u.last_name as inspector
+                                                  from public."certificate" inner join public."batch" on certificate.batchid = batch.id
+                                                  inner join public."user" as u on batch.inspector = u.id
+                                                  where certificate.serial_number like any(${certificates})` ;
+        console.log(result);
         generatePDFs(result, email, serialNumbers);
+
         res.status(200).json({message: 'PDF generation started. You will receive an email shortly.'});
     } catch (e) {
         res.status(400).json({message: `Error while generating PDFs : - ${e}`});

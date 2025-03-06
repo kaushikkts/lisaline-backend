@@ -325,7 +325,7 @@ async function generatePDFs(data, emailToSend, serialNumbers) {
                <div class="t m0 x5 h5 y18 ff1 fs3 fc1 sc0 ls0 ws0">The products mentioned have been thoroughly tested, validated and met performance accuracy specifications over the stated</div>
                <div class="t m0 x5 h5 y19 ff1 fs3 fc1 sc0 ls0 ws0">ranges at ISO 17025 2017certified Calibration laboratory of Lisaline Lifescience Technologies Pvt. Ltd.</div>
                <div class="t m0 x5 h5 y1a ff1 fs3 fc1 sc0 ls0 ws0">For more details:<span class="_ _a"> </span><span class="ff2 fc2">info@mydegrite.com https://www.mydegrite.com</span></div>
-               <div class="t m0 x10 h6 yc ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.serial_number.split('-')[0]}<span class="_ _b"> </span>${calibrationDate}</div>
+               <div class="t m0 x10 h6 yc ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.serial_number}<span class="_ _b"> </span>${calibrationDate}</div>
                <div class="t m0 x4 h6 y1b ff2 fs4 fc2 sc0 ls0 ws0">${certificate?.content?.referenceInstrumentation?.brand}<span class="_ _c"> </span>${certificate?.content?.referenceInstrumentation?.model}<span class="_ _d"> </span>${certificate?.validity_date}<span class="_ _e"> </span>±0.5 °C<span class="_ _d"> </span>     ${certificate?.content?.referenceInstrumentation?.serialNumber}</div>
                <div class="t m0 x11 h6 y1c ff2 fs4 fc2 sc0 ls0 ws0">25 ±5°C </div>
                <div class="t m0 x11 h6 y1d ff2 fs4 fc2 sc0 ls0 wso">50 ±15%</div>
@@ -347,8 +347,8 @@ async function generatePDFs(data, emailToSend, serialNumbers) {
 `
         };
         const browser = await puppeteer.launch({
-            executablePath: '/usr/bin/chromium-browser',
-            args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote']
+            // executablePath: '/usr/bin/chromium-browser',
+            // args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote']
         });
         const page = await browser.newPage();
         await page.setContent(file.content);
